@@ -41,10 +41,12 @@ if ( ! $zarrin_btn2_url ) {
 			<div class="frame">
 				<img src="<?php echo esc_url( $zarrin_hero_img ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" loading="eager">
 			</div>
-			<div class="float-card">
-				<span class="fc-label"><?php zarrin_icon_e( 'coin', 15 ); ?>قیمت امروز گرم طلای ۱۸</span>
-				<span class="fc-value"><?php echo esc_html( zarrin_money( zarrin_get( 'zarrin_price_18', '4250000' ) ) ); ?> <small>تومان</small></span>
-				<span class="fc-badge">▲ به‌روزرسانی: <?php echo esc_html( zarrin_get( 'zarrin_price_updated', 'امروز — ۱۲:۳۰' ) ); ?></span>
+			<?php $zarrin_hero_p18 = zarrin_get_prices(); ?>
+			<div class="float-card" data-live-item="p18">
+				<span class="fc-label"><?php zarrin_icon_e( 'coin', 15 ); ?>قیمت امروز گرم طلای ۱۸<?php if ( $zarrin_hero_p18['_live'] ) : ?><span class="live-dot" title="لحظه‌ای"></span><?php endif; ?></span>
+				<span class="fc-value live-value"><?php echo esc_html( zarrin_money( $zarrin_hero_p18['p18']['value'] ) ); ?> <small>تومان</small></span>
+				<span class="fc-badge">به‌روزرسانی: <span class="live-updated"><?php echo esc_html( $zarrin_hero_p18['_updated'] ); ?></span></span>
+				<span class="live-change"><?php echo zarrin_change_badge( $zarrin_hero_p18['p18']['change'] ); // phpcs:ignore ?></span>
 			</div>
 		</div>
 	</div>

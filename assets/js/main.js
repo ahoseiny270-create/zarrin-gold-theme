@@ -107,6 +107,35 @@
 		});
 	}
 
+	/* --- به‌روزرسانی لحظه‌ای قیمت طلا --- */
+	if (window.zarrinLive && window.zarrinLive.ajax && window.zarrinLive.enabled && document.querySelector('[data-live-item]')) {
+		var refreshPrices = function () {
+			if (!window.fetch) return;
+			fetch(window.zarrinLive.ajax + '?action=zarrin_live_prices', { cache: 'no-store' })
+				.then(function (r) { return r.json(); })
+				.then(function (res) {
+					if (!res || !res.success || !res.data || !res.data.items) return;
+					var items = res.data.items;
+					Object.keys(items).forEach(function (key) {
+						document.querySelectorAll('[data-live-item="' + key + '"]').forEach(function (card) {
+							var val = card.querySelector('.live-value');
+							if (val && items[key].formatted) {
+								val.textContent = items[key].formatted;
+								card.classList.add('flash');
+								window.setTimeout(function () { card.classList.remove('flash'); }, 1300);
+							}
+							var ch = card.querySelector('.live-change');
+							if (ch) ch.innerHTML = items[key].badge || '';
+						});
+					});
+					var updated = document.querySelector('.live-updated');
+					if (updated && res.data.updated) updated.textContent = res.data.updated;
+				})
+				.catch(function () { /* خطا: قیمت فعلی حفظ می‌شود */ });
+		};
+		window.setInterval(refreshPrices, Math.max(30, parseInt(window.zarrinLive.interval, 10) || 90) * 1000);
+	}
+
 	/* --- بستن منو با کلیک روی لینک‌ها (در موبایل) --- */
 	document.querySelectorAll('.main-nav a').forEach(function (link) {
 		link.addEventListener('click', function () {

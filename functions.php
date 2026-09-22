@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ZARRIN_VERSION', '1.0.0' );
+define( 'ZARRIN_VERSION', '1.1.0' );
 
 /* =========================================================
  * ۱) راه‌اندازی قالب
@@ -69,7 +69,7 @@ function zarrin_setup() {
 add_action( 'after_setup_theme', 'zarrin_setup' );
 
 /* =========================================================
- * ۲) محتوا عرض پست و خلاصه
+ * ۲) خلاصه نوشته
  * ======================================================= */
 function zarrin_excerpt_length( $length ) {
 	return 26;
@@ -115,6 +115,17 @@ function zarrin_assets() {
 
 	wp_enqueue_script( 'zarrin-main', get_template_directory_uri() . '/assets/js/main.js', array(), ZARRIN_VERSION, true );
 
+	// اطلاعات لازم برای به‌روزرسانی لحظه‌ای قیمت‌ها.
+	wp_localize_script(
+		'zarrin-main',
+		'zarrinLive',
+		array(
+			'ajax'     => admin_url( 'admin-ajax.php' ),
+			'interval' => 90,
+			'enabled'  => zarrin_live_enabled(),
+		)
+	);
+
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
@@ -148,6 +159,16 @@ function zarrin_money( $value ) {
 /** خواندن تنظیم سفارشی‌سازی */
 function zarrin_get( $key, $default = '' ) {
 	return get_theme_mod( $key, $default );
+}
+
+/** بررسی صحتی چک‌باکس */
+function zarrin_sanitize_checkbox( $checked ) {
+	return ( isset( $checked ) && true == $checked ) ? true : false;
+}
+
+/** آیا دریافت خودکار قیمت فعال است؟ */
+function zarrin_live_enabled() {
+	return (bool) zarrin_get( 'zarrin_live_enable', true );
 }
 
 /** آیکون‌های SVG قالب */
@@ -230,7 +251,163 @@ function zarrin_post_card() {
 }
 
 /* =========================================================
- * ۶) ووکامرس — اضافات
+ * ۶) قیمت لحظه‌ای طلا و سکه
+ * ======================================================= */
+
+/**
+ * دریافت قیمت‌های لحظه‌ای از TGJU و ذخیره در کش موقت.
+ * قیمت‌ها از API عمومی tgju.org به ریال دریافت و به تومان تبدیل می‌شوند.
+ *
+ * @return bool موفقیت دریافت.
+ */
+function zarrin_refresh_live_prices() {
+
+	// قفل کوتاه برای جلوگیری از درخواست‌های همزمان.
+	if ( get_transient( 'zarrin_live_prices_lock' ) ) {
+		return false;
+	}
+	set_transient( 'zarrin_live_prices_lock', 1, 45 );
+
+	$response = wp_remote_get(
+		'https://call1.tgju.org/ajax.json',
+		array(
+			'timeout'    => 10,
+			'user-agent' => 'Mozilla/5.0 (ZarrinTheme/' . ZARRIN_VERSION . ')',
+		)
+	);
+
+	if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+		return false;
+	}
+
+	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( empty( $body['current'] ) || ! is_array( $body['current'] ) ) {
+		return false;
+	}
+
+	$map  = array( 'geram18', 'geram24', 'sekee', 'mesghal' );
+	$keys = array(
+		'geram18' => 'p18',
+		'geram24' => 'p24',
+		'sekee'   => 'coin',
+		'mesghal' => 'mesghal',
+	);
+
+	$items = array();
+	foreach ( $map as $key ) {
+		if ( isset( $body['current'][ $key ]['p'] ) ) {
+			$rial = (float) str_replace( ',', '', (string) $body['current'][ $key ]['p'] );
+			if ( $rial > 0 ) {
+				$items[ $keys[ $key ] ] = array(
+					'toman' => $rial / 10, // تبدیل ریال به تومان.
+					'change'=> isset( $body['current'][ $key ]['dp'] ) ? (float) str_replace( ',', '', (string) $body['current'][ $key ]['dp'] ) : 0,
+				);
+			}
+		}
+	}
+
+	if ( count( $items ) < 2 ) {
+		return false;
+	}
+
+	$data = array(
+		'items'   => $items,
+		'updated' => date_i18n( 'H:i' ),
+		'time'    => time(),
+	);
+
+	$interval = max( 1, (int) zarrin_get( 'zarrin_live_interval', 10 ) );
+	set_transient( 'zarrin_live_prices', $data, MINUTE_IN_SECONDS * $interval );
+	set_transient( 'zarrin_live_prices_last', $data, DAY_IN_SECONDS ); // نسخه پشتیبان تا ۲۴ ساعت.
+
+	return true;
+}
+
+/**
+ * داده‌های قیمت برای نمایش (لحظه‌ای یا دستی).
+ *
+ * @return array
+ */
+function zarrin_get_prices() {
+
+	$live = get_transient( 'zarrin_live_prices' );
+
+	// اگر کش خالی و حالت لحظه‌ای فعال است، یک‌بار تلاش برای دریافت.
+	if ( ! $live && zarrin_live_enabled() ) {
+		zarrin_refresh_live_prices();
+		$live = get_transient( 'zarrin_live_prices' );
+	}
+
+	// اگر باز هم خالی بود، از آخرین داده معتبر (تا ۲۴ ساعت) استفاده کن.
+	if ( ! $live ) {
+		$live = get_transient( 'zarrin_live_prices_last' );
+	}
+
+	$manual = array(
+		'p18'     => zarrin_get( 'zarrin_price_18', '23966000' ),
+		'p24'     => zarrin_get( 'zarrin_price_24', '31954000' ),
+		'coin'    => zarrin_get( 'zarrin_price_coin', '237010000' ),
+		'mesghal' => zarrin_get( 'zarrin_price_mesghal', '103822000' ),
+	);
+
+	$prices = array(
+		'_live'    => (bool) $live,
+		'_updated' => ( $live && ! empty( $live['updated'] ) ) ? $live['updated'] : zarrin_get( 'zarrin_price_updated', '۱۲:۳۰' ),
+	);
+
+	foreach ( $manual as $key => $fallback ) {
+		$entry = array(
+			'value'  => is_numeric( $fallback ) ? (float) $fallback : $fallback,
+			'change' => null,
+		);
+		if ( $live && isset( $live['items'][ $key ] ) ) {
+			$entry['value']  = $live['items'][ $key ]['toman'];
+			$entry['change'] = isset( $live['items'][ $key ]['change'] ) ? $live['items'][ $key ]['change'] : 0;
+		}
+		$prices[ $key ] = $entry;
+	}
+
+	return $prices;
+}
+
+/** نشان درصد تغییر (سبز/قرمز) */
+function zarrin_change_badge( $dp ) {
+	if ( null === $dp || '' === $dp || ! is_numeric( $dp ) ) {
+		return '';
+	}
+	$dp    = (float) $dp;
+	$dir   = $dp > 0 ? 'up' : ( $dp < 0 ? 'down' : 'flat' );
+	$arrow = 'up' === $dir ? '▲' : ( 'down' === $dir ? '▼' : '◆' );
+	$num   = number_format( abs( $dp ), 2, '٫', '' );
+	$num   = rtrim( rtrim( $num, '0' ), '٫' );
+	return '<span class="p-change ' . esc_attr( $dir ) . '">' . esc_html( $arrow . ' ' . zarrin_fa_digits( $num ) . '٪' ) . '</span>';
+}
+
+/** خروجی AJAX برای به‌روزرسانی لحظه‌ای در مرورگر */
+function zarrin_ajax_live_prices() {
+
+	$data  = zarrin_get_prices();
+	$items = array();
+	foreach ( array( 'p18', 'p24', 'coin', 'mesghal' ) as $key ) {
+		$items[ $key ] = array(
+			'formatted' => zarrin_money( $data[ $key ]['value'] ),
+			'badge'     => zarrin_change_badge( $data[ $key ]['change'] ),
+		);
+	}
+
+	wp_send_json_success(
+		array(
+			'items'   => $items,
+			'updated' => $data['_updated'],
+			'live'    => $data['_live'],
+		)
+	);
+}
+add_action( 'wp_ajax_zarrin_live_prices', 'zarrin_ajax_live_prices' );
+add_action( 'wp_ajax_nopriv_zarrin_live_prices', 'zarrin_ajax_live_prices' );
+
+/* =========================================================
+ * ۷) ووکامرس — اضافات
  * ======================================================= */
 
 /** شمارنده سبد خرید با آجاکس به‌روز شود */
@@ -251,7 +428,7 @@ add_filter(
 );
 
 /* =========================================================
- * ۷) تنظیمات سفارشی‌سازی (نمایش ← سفارشی‌سازی)
+ * ۸) تنظیمات سفارشی‌سازی (نمایش ← سفارشی‌سازی)
  * ======================================================= */
 function zarrin_customize_register( $wp_customize ) {
 
@@ -263,7 +440,7 @@ function zarrin_customize_register( $wp_customize ) {
 		)
 	);
 
-	/* --- تابع کمکی برای فیلدهای متنی --- */
+	/* --- فیلدهای متنی --- */
 	function zarrin_add_field( $wp_customize, $id, $label, $section, $default = '', $type = 'text', $sanitize = 'sanitize_text_field' ) {
 		$wp_customize->add_setting(
 			$id,
@@ -282,7 +459,7 @@ function zarrin_customize_register( $wp_customize ) {
 		);
 	}
 
-	/* --- تابع کمکی برای فیلد تصویر --- */
+	/* --- فیلد تصویر --- */
 	function zarrin_add_image( $wp_customize, $id, $label, $section ) {
 		$wp_customize->add_setting(
 			$id,
@@ -352,14 +529,53 @@ function zarrin_customize_register( $wp_customize ) {
 		array(
 			'title'       => 'قیمت طلا و سکه',
 			'panel'       => 'zarrin_panel',
-			'description' => 'قیمت‌ها را عددی وارد کنید (مثلاً 4250000) تا با جداکننده هزارگان نمایش داده شوند. این قیمت‌ها دستی به‌روزرسانی می‌شوند.',
+			'description' => 'به‌صورت پیش‌فرض قیمت‌ها به‌صورت خودکار و لحظه‌ای از بازار طلا (tgju.org) دریافت و نمایش داده می‌شوند. مقادیر دستی فقط وقتی استفاده می‌شوند که دریافت خودکار غیرفعال باشد یا ارتباط برقرار نشود. اعداد را تومان و بدون جداکننده وارد کنید.',
 		)
 	);
-	zarrin_add_field( $wp_customize, 'zarrin_price_18', 'قیمت گرم طلای ۱۸ عیار (تومان)', 'zarrin_prices', '4250000' );
-	zarrin_add_field( $wp_customize, 'zarrin_price_24', 'قیمت گرم طلای ۲۴ عیار (تومان)', 'zarrin_prices', '5660000' );
-	zarrin_add_field( $wp_customize, 'zarrin_price_coin', 'قیمت سکه امامی (تومان)', 'zarrin_prices', '52000000' );
-	zarrin_add_field( $wp_customize, 'zarrin_price_mesghal', 'قیمت مثقال طلا (تومان)', 'zarrin_prices', '18500000' );
-	zarrin_add_field( $wp_customize, 'zarrin_price_updated', 'زمان آخرین به‌روزرسانی', 'zarrin_prices', 'امروز — ۱۲:۳۰' );
+
+	$wp_customize->add_setting(
+		'zarrin_live_enable',
+		array(
+			'default'           => true,
+			'sanitize_callback' => 'zarrin_sanitize_checkbox',
+		)
+	);
+	$wp_customize->add_control(
+		'zarrin_live_enable',
+		array(
+			'label'   => 'دریافت خودکار قیمت از بازار (لحظه‌ای)',
+			'section' => 'zarrin_prices',
+			'type'    => 'checkbox',
+		)
+	);
+
+	$wp_customize->add_setting(
+		'zarrin_live_interval',
+		array(
+			'default'           => 10,
+			'sanitize_callback' => 'absint',
+		)
+	);
+	$wp_customize->add_control(
+		'zarrin_live_interval',
+		array(
+			'label'       => 'فاصله به‌روزرسانی سرور (دقیقه)',
+			'description' => 'پیشنهاد: ۵ تا ۱۵ دقیقه. مرورگر بازدیدکنندگان هر ۹۰ ثانیه آخرین قیمت کش‌شده را می‌گیرد.',
+			'section'     => 'zarrin_prices',
+			'type'        => 'number',
+			'input_attrs' => array(
+				'min'  => 1,
+				'max'  => 120,
+				'step' => 1,
+			),
+		)
+	);
+
+	zarrin_add_field( $wp_customize, 'zarrin_price_18', 'قیمت دستی گرم طلای ۱۸ عیار (تومان)', 'zarrin_prices', '23966000' );
+	zarrin_add_field( $wp_customize, 'zarrin_price_24', 'قیمت دستی گرم طلای ۲۴ عیار (تومان)', 'zarrin_prices', '31954000' );
+	zarrin_add_field( $wp_customize, 'zarrin_price_coin', 'قیمت دستی سکه امامی (تومان)', 'zarrin_prices', '237010000' );
+	zarrin_add_field( $wp_customize, 'zarrin_price_mesghal', 'قیمت دستی مثقال طلا (تومان)', 'zarrin_prices', '103822000' );
+	zarrin_add_field( $wp_customize, 'zarrin_price_updated', 'زمان دستی (فقط وقتی دریافت خودکار خاموش است)', 'zarrin_prices', '۱۲:۳۰' );
 
 	/* ============ بخش: درباره ما ============ */
 	$wp_customize->add_section(

@@ -4,7 +4,7 @@ Theme URI: https://github.com/ahoseiny270-create/zarrin-gold-theme
 Author: ahoseiny270-create
 Author URI: https://github.com/ahoseiny270-create
 Description: قالب فروشگاهی لوکس مخصوص طلا‌فروشی و جواهرفی — کاملاً راست‌چین و فارسی، سازگار با ووکامرس، دارای تیکر قیمت طلا و سکه، بخش معرفی فروشگاه، خدمات، وبلاگ و تنظیمات اختصاصی در سفارشی‌سازی.
-Version: 1.0.0
+Version: 1.1.0
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -692,6 +692,31 @@ html.js .reveal.in-view{opacity:1;transform:none}
   .nav-list .sub-menu{
     position:static;opacity:1;visibility:visible;transform:none;
     background:transparent;box-shadow:none;border:0;padding:0 0 0 0;margin:0 0 6px 18px;min-width:0;
+  }
+  .nav-list .sub-menu a{color:#cfc4a6;padding:9px 14px}
+  .nav-list .sub-menu a:hover{background:rgba(255,255,255,.05);color:var(--gold)}
+  .products-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr;gap:34px;padding:52px 20px 36px}
+  .hero-media img{height:340px}
+  .float-card{right:12px;bottom:14px}
+  .section{padding:54px 0}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
+  .entry{padding:44px 20px 54px}
+  .comment-list .children{margin-right:22px}
+  .topbar-inner{justify-content:center}
+  .topbar-socials{display:none}
+}
+@media (max-width:480px){
+  .products-grid,.features-grid,.blog-section .posts-grid{grid-template-columns:1fr}
+  .prices-grid{grid-template-columns:1fr}
+  .hide-sm{display:none}
+  .hero-title{font-size:1.75rem}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .post-nav{flex-direction:column}
+  .cta-banner{padding:44px 24px}
+  .author-box{flex-direction:column;text-align:center}
+}
+:transparent;box-shadow:none;border:0;padding:0 0 0 0;margin:0 0 6px 18px;min-width:0;
   }
   .nav-list .sub-menu a{color:#cfc4a6;padding:9px 14px}
   .nav-list .sub-menu a:hover{background:rgba(255,255,255,.05);color:var(--gold)}
