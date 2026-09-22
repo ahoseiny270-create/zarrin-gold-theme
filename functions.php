@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ZARRIN_VERSION', '1.1.0' );
+define( 'ZARRIN_VERSION', '1.2.0' );
 
 /* =========================================================
  * ۱) راه‌اندازی قالب
@@ -171,6 +171,9 @@ function zarrin_live_enabled() {
 	return (bool) zarrin_get( 'zarrin_live_enable', true );
 }
 
+// راه‌اندازی دمو با یک کلیک.
+require get_template_directory() . '/inc/demo-import.php';
+
 /** آیکون‌های SVG قالب */
 function zarrin_icon( $name, $size = 20 ) {
 	$common = 'width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
@@ -312,7 +315,7 @@ function zarrin_refresh_live_prices() {
 
 	$data = array(
 		'items'   => $items,
-		'updated' => date_i18n( 'H:i' ),
+		'updated' => zarrin_fa_digits( date_i18n( 'H:i' ) ),
 		'time'    => time(),
 	);
 
@@ -426,6 +429,19 @@ add_filter(
 		return 4;
 	}
 );
+
+/** افزودن واحد پول «تومان» به ووکامرس */
+function zarrin_add_toman_currency( $currencies ) {
+	$currencies['IRT'] = 'تومان ایران';
+	return $currencies;
+}
+add_filter( 'woocommerce_currencies', 'zarrin_add_toman_currency' );
+
+/** نماد تومان */
+function zarrin_toman_symbol( $symbol, $currency ) {
+	return ( 'IRT' === $currency ) ? 'تومان' : $symbol;
+}
+add_filter( 'woocommerce_currency_symbol', 'zarrin_toman_symbol', 10, 2 );
 
 /* =========================================================
  * ۸) تنظیمات سفارشی‌سازی (نمایش ← سفارشی‌سازی)

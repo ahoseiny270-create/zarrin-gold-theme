@@ -54,30 +54,33 @@ if ( ! $zarrin_btn2_url ) {
 
 <!-- ================= نوار قیمت لحظه‌ای ================= -->
 <section class="prices-strip" aria-label="قیمت لحظه‌ای طلا و سکه">
+	<?php $zarrin_prices_data = zarrin_get_prices(); ?>
 	<div class="container">
 		<div class="prices-grid">
 			<?php
-			$zarrin_prices = array(
-				array( 'label' => 'طلای ۱۸ عیار', 'unit' => 'هر گرم', 'icon' => 'coin', 'value' => zarrin_get( 'zarrin_price_18', '4250000' ) ),
-				array( 'label' => 'طلای ۲۴ عیار', 'unit' => 'هر گرم', 'icon' => 'coin', 'value' => zarrin_get( 'zarrin_price_24', '5660000' ) ),
-				array( 'label' => 'سکه امامی', 'unit' => 'هر عدد', 'icon' => 'award', 'value' => zarrin_get( 'zarrin_price_coin', '52000000' ) ),
-				array( 'label' => 'مثقال طلا', 'unit' => 'هر مثقال', 'icon' => 'diamond', 'value' => zarrin_get( 'zarrin_price_mesghal', '18500000' ) ),
+			$zarrin_prices_map = array(
+				'p18'     => array( 'label' => 'طلای ۱۸ عیار', 'unit' => 'هر گرم', 'icon' => 'coin' ),
+				'p24'     => array( 'label' => 'طلای ۲۴ عیار', 'unit' => 'هر گرم', 'icon' => 'coin' ),
+				'coin'    => array( 'label' => 'سکه امامی', 'unit' => 'هر عدد', 'icon' => 'award' ),
+				'mesghal' => array( 'label' => 'مثقال طلا', 'unit' => 'هر مثقال', 'icon' => 'diamond' ),
 			);
-			foreach ( $zarrin_prices as $zarrin_price ) :
+			foreach ( $zarrin_prices_map as $zarrin_pkey => $zarrin_price ) :
+				$zarrin_pitem = $zarrin_prices_data[ $zarrin_pkey ];
 				?>
-				<div class="price-card reveal">
+				<div class="price-card reveal" data-live-item="<?php echo esc_attr( $zarrin_pkey ); ?>">
 					<span class="p-icon"><?php zarrin_icon_e( $zarrin_price['icon'], 22 ); ?></span>
 					<span>
-						<span class="p-label"><?php echo esc_html( $zarrin_price['label'] ); ?></span>
-						<span class="p-value" data-fa-num><?php echo esc_html( zarrin_money( $zarrin_price['value'] ) ); ?></span>
+						<span class="p-label"><?php echo esc_html( $zarrin_price['label'] ); ?><?php if ( $zarrin_prices_data['_live'] ) : ?><span class="live-dot" title="لحظه‌ای"></span><?php endif; ?></span>
+						<span class="p-value live-value" data-fa-num><?php echo esc_html( zarrin_money( $zarrin_pitem['value'] ) ); ?></span>
 						<span class="p-unit">تومان | <?php echo esc_html( $zarrin_price['unit'] ); ?></span>
+						<span class="live-change"><?php echo zarrin_change_badge( $zarrin_pitem['change'] ); // phpcs:ignore ?></span>
 					</span>
 				</div>
 				<?php
 			endforeach;
 			?>
 		</div>
-		<p class="prices-note">* قیمت‌ها جنبه اطلاع‌رسانی دارند؛ برای خرید نهایی با فروشگاه هماهنگ کنید — آخرین به‌روزرسانی: <?php echo esc_html( zarrin_get( 'zarrin_price_updated', 'امروز — ۱۲:۳۰' ) ); ?></p>
+		<p class="prices-note">* قیمت‌ها به‌صورت خودکار از بازار طلا به‌روزرسانی می‌شوند — آخرین به‌روزرسانی: <span class="live-updated"><?php echo esc_html( $zarrin_prices_data['_updated'] ); ?></span> — برای خرید نهایی با فروشگاه هماهنگ کنید.</p>
 	</div>
 </section>
 
