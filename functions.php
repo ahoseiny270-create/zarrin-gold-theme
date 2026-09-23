@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ZARRIN_VERSION', '1.4.0' );
+define( 'ZARRIN_VERSION', '1.4.1' );
 
 /* =========================================================
  * ۱) راه‌اندازی قالب
@@ -258,13 +258,24 @@ function zarrin_skin_img_dir() {
 	return get_template_directory() . '/assets/img';
 }
 
-/** آدرس تصویر نمونه پوسته فعال */
-function zarrin_skin_img( $file ) {
-	$skin = zarrin_skin();
-	if ( 'gold' !== $skin && file_exists( get_template_directory() . '/assets/img/skins/' . $skin . '/' . $file ) ) {
+/**
+ * آدرس تصویر نمونه برای یک پوسته دلخواه.
+ *
+ * @param string $skin شناسه پوسته.
+ * @param string $file نام فایل تصویر.
+ * @return string
+ */
+function zarrin_skin_img_for( $skin, $file ) {
+	$skins = zarrin_skins();
+	if ( 'gold' !== $skin && isset( $skins[ $skin ] ) && file_exists( get_template_directory() . '/assets/img/skins/' . $skin . '/' . $file ) ) {
 		return get_template_directory_uri() . '/assets/img/skins/' . $skin . '/' . $file;
 	}
 	return get_template_directory_uri() . '/assets/img/' . $file;
+}
+
+/** آدرس تصویر نمونه پوسته فعال */
+function zarrin_skin_img( $file ) {
+	return zarrin_skin_img_for( zarrin_skin(), $file );
 }
 
 /** افزودن کلاس پوسته به body */
@@ -311,6 +322,9 @@ function zarrin_live_enabled() {
 
 // راه‌اندازی دمو با یک کلیک.
 require get_template_directory() . '/inc/demo-import.php';
+
+// مدیریت دموها (انتخاب سریع از نوار بالای پیشخوان + کارت‌های تصویری).
+require get_template_directory() . '/inc/skins-admin.php';
 
 /** آیکون‌های SVG قالب */
 function zarrin_icon( $name, $size = 20 ) {

@@ -33,6 +33,7 @@ function zarrin_demo_page() {
 	$done    = (bool) get_option( 'zarrin_demo_done' );
 	$success = isset( $_GET['zarrin_demo'] ) && 'done' === $_GET['zarrin_demo']; // phpcs:ignore WordPress.Security.NonceVerification
 	$error   = isset( $_GET['zarrin_demo'] ) && 'error' === $_GET['zarrin_demo']; // phpcs:ignore WordPress.Security.NonceVerification
+	$reset   = isset( $_GET['zarrin_demo'] ) && 'reset' === $_GET['zarrin_demo']; // phpcs:ignore WordPress.Security.NonceVerification
 	$url     = wp_nonce_url( admin_url( 'admin-post.php?action=zarrin_demo_import' ), 'zarrin_demo_import' );
 	?>
 	<div class="wrap">
@@ -40,8 +41,34 @@ function zarrin_demo_page() {
 
 		<?php if ( $success ) : ?>
 			<div class="notice notice-success is-dismissible"><p><strong>دمو با موفقیت راه‌اندازی شد!</strong> حالا <a href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank">صفحه اصلی سایت</a> را ببینید.</p></div>
+		<?php elseif ( $reset ) : ?>
+			<div class="notice notice-info is-dismissible"><p><strong>دمو بازنشانی شد.</strong> حالا می‌توانید دوباره دکمه «راه‌اندازی دمو با یک کلیک» را بزنید تا محتوای نمونه دموی فعال ساخته شود.</p></div>
 		<?php elseif ( $error ) : ?>
 			<div class="notice notice-error is-dismissible"><p><strong>خطا:</strong> دمو قبلاً راه‌اندازی شده و نمی‌توان دوباره اجرا کرد.</p></div>
+		<?php endif; ?>
+
+		<?php if ( function_exists( 'zarrin_skins_cards_html' ) ) : ?>
+			<div class="card" style="max-width:880px;padding:8px 26px 20px;margin-bottom:18px;">
+				<h2>🎨 انتخاب دمو — <?php echo esc_html( zarrin_fa_digits( count( zarrin_skins() ) ) ); ?> دمو در دسترس</h2>
+				<p style="margin-top:0;">
+					قالب زرین چند دموی آماده <strong>درون خودش</strong> دارد؛ دموها قالب جداگانه نیستند.
+					با فعال‌سازی هر دمو، رنگ‌بندی و تصاویر نمونه سایت عوض می‌شود.
+					دموی فعال کنونی: <strong><?php echo esc_html( zarrin_demo_name() ); ?></strong>
+				</p>
+				<?php echo zarrin_skins_cards_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+				<p style="margin:16px 0 0;">
+					<a class="button" href="<?php echo esc_url( admin_url( 'customize.php?autofocus[section]=zarrin_skin_section' ) ); ?>">تنظیمات بیشتر در سفارشی‌سازی</a>
+					<?php if ( get_option( 'zarrin_demo_done' ) ) : ?>
+						<a class="button" style="margin-inline-start:8px;" href="<?php echo esc_url( zarrin_demo_reset_url() ); ?>">ساخت دوباره محتوای نمونه</a>
+					<?php endif; ?>
+				</p>
+				<p style="margin:12px 0 0;color:#666;font-size:12px;line-height:1.9;">
+					نسخه قالب: <strong><?php echo esc_html( zarrin_fa_digits( ZARRIN_VERSION ) ); ?></strong>
+					— اگر تعداد دموها کمتر از پنج است، یعنی نسخه قدیمی نصب شده؛ آخرین بسته از
+					<a href="https://github.com/ahoseiny270-create/zarrin-gold-theme/releases" target="_blank" rel="noopener">صفحه Releases گیت‌هاب</a> قابل دانلود است.
+					برای دیدن تصاویر محصولات هر دمو، یک‌بار «ساخت دوباره محتوای نمونه» را بزنید.
+				</p>
+			</div>
 		<?php endif; ?>
 
 		<div class="card" style="max-width:760px;padding:8px 26px 20px;">
