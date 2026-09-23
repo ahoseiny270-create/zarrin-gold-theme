@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ZARRIN_VERSION', '1.2.0' );
+define( 'ZARRIN_VERSION', '1.3.0' );
 
 /* =========================================================
  * ۱) راه‌اندازی قالب
@@ -105,7 +105,8 @@ add_action( 'widgets_init', 'zarrin_widgets_init' );
  * ======================================================= */
 function zarrin_assets() {
 
-	wp_enqueue_style( 'zarrin-style', get_stylesheet_uri(), array(), ZARRIN_VERSION );
+	// پوسته رنگ فعال (دموی ۱ تا ۴) — هر پوسته یک استایل کامل است.
+	wp_enqueue_style( 'zarrin-style', zarrin_skin_css(), array(), ZARRIN_VERSION );
 
 	// فونت وزیرمتن — لوکال (بدون نیاز به اینترنت/CDN).
 	wp_add_inline_style(
@@ -135,6 +136,84 @@ add_action( 'wp_enqueue_scripts', 'zarrin_assets' );
 /* =========================================================
  * ۵) توابع کمکی
  * ======================================================= */
+
+/* =========================================================
+ * ۵-۱) پوسته‌های رنگ — چهار دموی آماده در یک قالب
+ * ======================================================= */
+
+/** فهرست پوسته‌های رنگ قالب */
+function zarrin_skins() {
+	return array(
+		'gold'    => array(
+			'name'  => 'زرین — تیره طلایی',
+			'demo'  => 'دموی ۱',
+			'label' => 'زرین',
+		),
+		'light'   => array(
+			'name'  => 'زرین روشن — سفید-عاجی',
+			'demo'  => 'دموی ۲',
+			'label' => 'زرین روشن',
+		),
+		'emerald' => array(
+			'name'  => 'زرین زمرد — زمرد تیره',
+			'demo'  => 'دموی ۳',
+			'label' => 'زرین زمرد',
+		),
+		'choco'   => array(
+			'name'  => 'زرین کاکائو — شکلاتی/کاراملی',
+			'demo'  => 'دموی ۴',
+			'label' => 'زرین کاکائو',
+		),
+	);
+}
+
+/** شناسه پوسته فعال */
+function zarrin_skin() {
+	$skin  = zarrin_get( 'zarrin_demo_skin', 'gold' );
+	$skins = zarrin_skins();
+	return isset( $skins[ $skin ] ) ? $skin : 'gold';
+}
+
+/** نام کوتاه پوسته/دموی فعال (برای متن‌های پیشخوان) */
+function zarrin_demo_name() {
+	$skins = zarrin_skins();
+	$skin  = zarrin_skin();
+	return $skins[ $skin ]['label'];
+}
+
+/** آدرس فایل استایل پوسته فعال */
+function zarrin_skin_css() {
+	$skin = zarrin_skin();
+	if ( 'gold' === $skin ) {
+		return get_stylesheet_uri();
+	}
+	return get_template_directory_uri() . '/assets/css/skin-' . $skin . '.css';
+}
+
+/** مسیر پوشه تصاویر نمونه پوسته فعال */
+function zarrin_skin_img_dir() {
+	$skin = zarrin_skin();
+	if ( 'gold' !== $skin && file_exists( get_template_directory() . '/assets/img/skins/' . $skin . '/hero.jpg' ) ) {
+		return get_template_directory() . '/assets/img/skins/' . $skin;
+	}
+	return get_template_directory() . '/assets/img';
+}
+
+/** آدرس تصویر نمونه پوسته فعال */
+function zarrin_skin_img( $file ) {
+	$skin = zarrin_skin();
+	if ( 'gold' !== $skin && file_exists( get_template_directory() . '/assets/img/skins/' . $skin . '/' . $file ) ) {
+		return get_template_directory_uri() . '/assets/img/skins/' . $skin . '/' . $file;
+	}
+	return get_template_directory_uri() . '/assets/img/' . $file;
+}
+
+/** افزودن کلاس پوسته به body */
+function zarrin_body_class( $classes ) {
+	$classes[] = 'zarrin-skin-' . zarrin_skin();
+	return $classes;
+}
+add_filter( 'body_class', 'zarrin_body_class' );
 
 /** آیا ووکامرس فعال است؟ */
 function zarrin_is_woo() {
@@ -202,6 +281,15 @@ function zarrin_icon( $name, $size = 20 ) {
 		'calendar' => '<svg ' . $common . '><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
 		'pen'      => '<svg ' . $common . '><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
 	);
+
+	// نام‌های جایگزین (هدر و فوتر از instagram/whatsapp استفاده می‌کنند).
+	$aliases = array(
+		'instagram' => 'insta',
+		'whatsapp'  => 'whats',
+	);
+	if ( isset( $aliases[ $name ] ) ) {
+		$name = $aliases[ $name ];
+	}
 
 	return isset( $icons[ $name ] ) ? $icons[ $name ] : '';
 }
@@ -495,6 +583,38 @@ function zarrin_customize_register( $wp_customize ) {
 			)
 		);
 	}
+
+	/* ============ بخش: ظاهر سایت (انتخاب دمو) ============ */
+	$wp_customize->add_section(
+		'zarrin_skin_section',
+		array(
+			'title'       => 'ظاهر سایت — انتخاب دمو',
+			'panel'       => 'zarrin_panel',
+			'priority'    => 1,
+			'description' => 'چهار دموی آماده زرین در یک قالب. با تغییر این گزینه، رنگ‌بندی، جزئیات ظاهری و تصاویر نمونه سایت عوض می‌شود؛ متن‌ها و تصاویری که خودتان تغییر داده باشید دست‌نخورده می‌ماند.',
+		)
+	);
+	$wp_customize->add_setting(
+		'zarrin_demo_skin',
+		array(
+			'default'           => 'gold',
+			'sanitize_callback' => 'sanitize_key',
+		)
+	);
+	$zarrin_skin_choices = array();
+	foreach ( zarrin_skins() as $zarrin_slug => $zarrin_info ) {
+		$zarrin_skin_choices[ $zarrin_slug ] = $zarrin_info['name'] . ' — ' . $zarrin_info['demo'];
+	}
+	$wp_customize->add_control(
+		'zarrin_demo_skin',
+		array(
+			'label'       => 'پوسته رنگ (دمو)',
+			'description' => 'دموی ۱: تیره طلایی (پیش‌فرض) — دموی ۲: روشن عاجی — دموی ۳: زمرد تیره — دموی ۴: شکلاتی/کاراملی',
+			'section'     => 'zarrin_skin_section',
+			'type'        => 'select',
+			'choices'     => $zarrin_skin_choices,
+		)
+	);
 
 	/* ============ بخش: هیرو ============ */
 	$wp_customize->add_section(

@@ -1,35 +1,26 @@
 /*
-Theme Name: زرین | قالب فروشگاه طلا
-Theme URI: https://github.com/ahoseiny270-create/zarrin-gold-theme
-Author: ahoseiny270-create
-Author URI: https://github.com/ahoseiny270-create
-Description: قالب فروشگاهی لوکس مخصوص طلا‌فروشی و جواهرفی — کاملاً راست‌چین و فارسی، سازگار با ووکامرس، دارای تیکر قیمت طلا و سکه، بخش معرفی فروشگاه، خدمات، وبلاگ و تنظیمات اختصاصی در سفارشی‌سازی.
-Version: 1.2.0
-Requires at least: 6.0
-Requires PHP: 7.4
-License: GNU General Public License v2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Text Domain: zarrin
-Tags: e-commerce, rtl-language-support, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-*/
+ * پوسته رنگ «زرین کاکائو» (دموی ۴) — شکلاتی/کاراملی
+ * این فایل جایگزین کامل style.css می‌شود؛ از «نمایش ← سفارشی‌سازی ← ظاهر سایت» انتخاب کنید.
+ */
+
 
 /* ============ متغیرها و پایه ============ */
 :root{
-  --gold:#d9b64e;
-  --gold-strong:#c9a227;
-  --gold-soft:#f1dc9b;
-  --gold-ink:#2d2305;
-  --ink:#191510;
-  --ink-2:#221d14;
-  --ink-3:#2c2618;
-  --paper:#faf7ef;
-  --paper-2:#f3edde;
-  --text:#2b2418;
-  --muted:#8a7f66;
-  --line:rgba(201,162,39,.22);
-  --grad-gold:linear-gradient(135deg,#f6e27a 0%,#d9b64e 45%,#b8892e 100%);
-  --shadow-sm:0 2px 10px rgba(25,21,16,.08);
-  --shadow-md:0 12px 32px rgba(25,21,16,.16);
+  --gold:#e6b45f;
+  --gold-strong:#c2903c;
+  --gold-soft:#f6e3bd;
+  --gold-ink:#2b1a08;
+  --ink:#221510;
+  --ink-2:#2b1b12;
+  --ink-3:#352016;
+  --paper:#fbf6ee;
+  --paper-2:#f2e7d7;
+  --text:#33241a;
+  --muted:#8b7358;
+  --line:rgba(194,144,60,.22);
+  --grad-gold:linear-gradient(135deg,#fae4b6 0%,#e6b45f 45%,#b3762c 100%);
+  --shadow-sm:0 2px 10px rgba(34,21,16,.08);
+  --shadow-md:0 12px 32px rgba(34,21,16,.16);
   --radius:16px;
   --font:'Vazirmatn',Vazirmatn,Tahoma,'Segoe UI',sans-serif;
 }
@@ -78,11 +69,11 @@ input,textarea,select,button{font-family:inherit}
 }
 .btn-gold{
   background:var(--grad-gold);color:var(--gold-ink);
-  box-shadow:0 6px 20px rgba(201,162,39,.35);
+  box-shadow:0 6px 20px rgba(194,144,60,.35);
 }
-.btn-gold:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(201,162,39,.45);color:var(--gold-ink)}
-.btn-ghost{border:1px solid rgba(217,182,78,.45);color:var(--gold-soft);background:transparent}
-.btn-ghost:hover{background:rgba(217,182,78,.12);color:#fff}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(194,144,60,.45);color:var(--gold-ink)}
+.btn-ghost{border:1px solid rgba(230,180,95,.45);color:var(--gold-soft);background:transparent}
+.btn-ghost:hover{background:rgba(230,180,95,.12);color:#fff}
 .btn-dark{background:var(--ink);color:var(--gold-soft)}
 .btn-dark:hover{background:#000;color:var(--gold)}
 
@@ -110,7 +101,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 }
 
 /* ============ نوار بالا ============ */
-.topbar{background:var(--ink);color:#cfc4a6;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar{background:var(--ink);color:#d0bda4;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.06)}
 .topbar-inner{display:flex;justify-content:space-between;align-items:center;min-height:42px;gap:16px}
 .topbar-items{display:flex;gap:24px;align-items:center}
 .topbar-item{display:inline-flex;align-items:center;gap:8px}
@@ -123,8 +114,8 @@ html.js .reveal.in-view{opacity:1;transform:none}
 /* ============ هدر ============ */
 .site-header{
   position:sticky;top:0;z-index:999;
-  background:rgba(25,21,16,.94);backdrop-filter:blur(10px);
-  border-bottom:1px solid rgba(217,182,78,.2);transition:box-shadow .25s;
+  background:rgba(34,21,16,.94);backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(230,180,95,.2);transition:box-shadow .25s;
 }
 .site-header.scrolled{box-shadow:0 12px 34px rgba(0,0,0,.4)}
 .header-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:78px}
@@ -134,7 +125,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .brand-link{display:flex;align-items:center;gap:12px}
 .brand-mark{
   width:46px;height:46px;display:grid;place-items:center;border-radius:14px;
-  background:var(--grad-gold);color:var(--gold-ink);box-shadow:0 4px 16px rgba(201,162,39,.45);flex:none;
+  background:var(--grad-gold);color:var(--gold-ink);box-shadow:0 4px 16px rgba(194,144,60,.45);flex:none;
 }
 .brand-name{display:block;font-size:1.35rem;font-weight:900;color:#fff;line-height:1.3}
 .brand-tag{display:block;font-size:.7rem;color:var(--gold);letter-spacing:3px}
@@ -144,7 +135,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .nav-list>li{position:relative}
 .nav-list a{
   display:flex;align-items:center;gap:6px;padding:10px 15px;
-  color:#e9e2cd;font-weight:600;font-size:.94rem;border-radius:10px;transition:.2s;
+  color:#e9dcc6;font-weight:600;font-size:.94rem;border-radius:10px;transition:.2s;
 }
 .nav-list a:hover,
 .nav-list .current-menu-item>a,
@@ -168,8 +159,8 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .header-actions{display:flex;align-items:center;gap:9px}
 .icon-btn{
   position:relative;width:43px;height:43px;display:grid;place-items:center;
-  border-radius:13px;border:1px solid rgba(217,182,78,.28);
-  background:transparent;color:#e9e2cd;cursor:pointer;transition:.2s;
+  border-radius:13px;border:1px solid rgba(230,180,95,.28);
+  background:transparent;color:#e9dcc6;cursor:pointer;transition:.2s;
 }
 .icon-btn:hover{color:var(--gold);border-color:var(--gold)}
 .cart-count{
@@ -201,8 +192,8 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .hero{
   position:relative;overflow:hidden;color:#efe7cf;
   background:
-    radial-gradient(900px 420px at 85% -10%,rgba(217,182,78,.24),transparent 60%),
-    radial-gradient(700px 400px at 8% 115%,rgba(217,182,78,.15),transparent 60%),
+    radial-gradient(900px 420px at 85% -10%,rgba(230,180,95,.24),transparent 60%),
+    radial-gradient(700px 400px at 8% 115%,rgba(230,180,95,.15),transparent 60%),
     var(--ink);
 }
 .hero::before{
@@ -215,63 +206,63 @@ html.js .reveal.in-view{opacity:1;transform:none}
 }
 .hero-eyebrow{
   display:inline-flex;align-items:center;gap:9px;font-size:.83rem;font-weight:700;color:var(--gold);
-  border:1px solid rgba(217,182,78,.4);border-radius:999px;padding:7px 18px;margin-bottom:22px;
-  background:rgba(217,182,78,.07);
+  border:1px solid rgba(230,180,95,.4);border-radius:999px;padding:7px 18px;margin-bottom:22px;
+  background:rgba(230,180,95,.07);
 }
 .hero-title{
   font-size:clamp(1.9rem,4.5vw,3.3rem);font-weight:900;color:#fff;line-height:1.6;margin-bottom:14px;
 }
 .hero-title .grad{background:var(--grad-gold);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero-sub{color:#b9ae91;font-size:1.05rem;max-width:520px;margin-bottom:0}
+.hero-sub{color:#c0a98d;font-size:1.05rem;max-width:520px;margin-bottom:0}
 .hero-actions{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
 .hero-media{position:relative}
 .hero-media .frame{
-  border-radius:34px;overflow:hidden;border:1px solid rgba(217,182,78,.38);
+  border-radius:34px;overflow:hidden;border:1px solid rgba(230,180,95,.38);
   box-shadow:0 34px 80px rgba(0,0,0,.5);transform:rotate(-2deg);
 }
 .hero-media img{display:block;width:100%;height:470px;object-fit:cover}
 .float-card{
   position:absolute;bottom:26px;right:-16px;z-index:2;
-  background:rgba(25,21,16,.92);backdrop-filter:blur(8px);
+  background:rgba(34,21,16,.92);backdrop-filter:blur(8px);
   border:1px solid var(--line);border-radius:18px;padding:16px 22px;
   box-shadow:var(--shadow-md);min-width:240px;
 }
-.float-card .fc-label{font-size:.78rem;color:#b9ae91;display:flex;align-items:center;gap:7px}
+.float-card .fc-label{font-size:.78rem;color:#c0a98d;display:flex;align-items:center;gap:7px}
 .float-card .fc-label svg{color:var(--gold)}
 .float-card .fc-value{font-size:1.55rem;font-weight:900;color:var(--gold);line-height:1.5}
-.float-card .fc-value small{font-size:.72rem;font-weight:600;color:#b9ae91}
+.float-card .fc-value small{font-size:.72rem;font-weight:600;color:#c0a98d}
 .float-card .fc-badge{color:#4ade80;font-size:.78rem;font-weight:700}
 
 /* ============ نوار قیمت‌ها ============ */
-.prices-strip{background:var(--ink-2);border-bottom:1px solid rgba(217,182,78,.15);padding:28px 0}
+.prices-strip{background:var(--ink-2);border-bottom:1px solid rgba(230,180,95,.15);padding:28px 0}
 .prices-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .price-card{
   display:flex;align-items:center;gap:14px;
-  background:rgba(255,255,255,.03);border:1px solid rgba(217,182,78,.17);
+  background:rgba(255,255,255,.03);border:1px solid rgba(230,180,95,.17);
   border-radius:var(--radius);padding:17px 19px;transition:.25s;
 }
 .price-card:hover{transform:translateY(-3px);border-color:var(--gold)}
 .p-icon{
   width:46px;height:46px;flex:none;border-radius:13px;
-  background:rgba(217,182,78,.13);color:var(--gold);display:grid;place-items:center;
+  background:rgba(230,180,95,.13);color:var(--gold);display:grid;place-items:center;
 }
-.p-label{font-size:.8rem;color:#b9ae91}
+.p-label{font-size:.8rem;color:#c0a98d}
 .p-value{font-weight:900;color:#fff;font-size:1.12rem;line-height:1.6}
 .p-unit{font-size:.7rem;color:var(--gold);font-weight:600}
-.prices-note{text-align:center;color:#8d8163;font-size:.74rem;margin:16px 0 0}
+.prices-note{text-align:center;color:#9c8367;font-size:.74rem;margin:16px 0 0}
 
 /* ============ ویژگی‌ها ============ */
 .features{background:var(--paper)}
 .features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
 .feature{
-  background:#fff;border:1px solid rgba(201,162,39,.16);border-radius:var(--radius);
+  background:#fff;border:1px solid rgba(194,144,60,.16);border-radius:var(--radius);
   padding:28px 24px;text-align:center;box-shadow:var(--shadow-sm);transition:.25s;
 }
 .feature:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--gold)}
 .feature-icon{
   width:62px;height:62px;margin:0 auto 16px;border-radius:18px;
   background:var(--grad-gold);color:var(--gold-ink);display:grid;place-items:center;
-  box-shadow:0 8px 22px rgba(201,162,39,.32);
+  box-shadow:0 8px 22px rgba(194,144,60,.32);
 }
 .feature h3{font-size:1.02rem;margin-bottom:6px}
 .feature p{color:var(--muted);font-size:.85rem;margin:0}
@@ -280,7 +271,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .products-section{background:linear-gradient(180deg,var(--paper),var(--paper-2))}
 .products-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
 .product-card{
-  background:#fff;border:1px solid rgba(201,162,39,.16);border-radius:var(--radius);
+  background:#fff;border:1px solid rgba(194,144,60,.16);border-radius:var(--radius);
   overflow:hidden;transition:.25s;position:relative;display:flex;flex-direction:column;
 }
 .product-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);border-color:var(--gold)}
@@ -295,7 +286,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .product-badge.off{background:#2f2a1c;color:var(--gold-soft)}
 .thumb-fallback{
   width:100%;height:100%;display:grid;place-items:center;color:var(--gold-strong);
-  background:linear-gradient(135deg,var(--paper-2),#e8ddc2);
+  background:linear-gradient(135deg,var(--paper-2),#ead9bf);
 }
 .product-body{padding:18px;display:flex;flex-direction:column;gap:7px;flex:1}
 .product-cat{font-size:.74rem;color:var(--muted)}
@@ -322,7 +313,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .woocommerce ul.products::before,.woocommerce ul.products::after{display:none}
 .woocommerce ul.products li.product{
   width:auto!important;float:none!important;margin:0!important;
-  background:#fff;border:1px solid rgba(201,162,39,.16);border-radius:var(--radius);
+  background:#fff;border:1px solid rgba(194,144,60,.16);border-radius:var(--radius);
   overflow:hidden;padding:0 0 18px;transition:.25s;position:relative;text-align:right;
   display:flex;flex-direction:column;
 }
@@ -402,9 +393,9 @@ html.js .reveal.in-view{opacity:1;transform:none}
 
 /* ============ درباره ما ============ */
 .about{
-  position:relative;overflow:hidden;color:#e9e2cd;
+  position:relative;overflow:hidden;color:#e9dcc6;
   background:
-    radial-gradient(700px 380px at 90% 0%,rgba(217,182,78,.16),transparent 60%),
+    radial-gradient(700px 380px at 90% 0%,rgba(230,180,95,.16),transparent 60%),
     var(--ink);
 }
 .about::before{
@@ -417,29 +408,29 @@ html.js .reveal.in-view{opacity:1;transform:none}
 }
 .about-media{position:relative}
 .about-media img{
-  border-radius:28px;border:1px solid rgba(217,182,78,.32);
+  border-radius:28px;border:1px solid rgba(230,180,95,.32);
   box-shadow:0 30px 64px rgba(0,0,0,.45);width:100%;height:430px;object-fit:cover;
 }
 .exp-badge{
   position:absolute;top:-18px;left:20px;z-index:2;
   background:var(--grad-gold);color:var(--gold-ink);border-radius:20px;
-  padding:16px 24px;text-align:center;font-weight:900;box-shadow:0 14px 30px rgba(201,162,39,.4);
+  padding:16px 24px;text-align:center;font-weight:900;box-shadow:0 14px 30px rgba(194,144,60,.4);
 }
 .exp-badge .num{display:block;font-size:1.9rem;line-height:1.3}
 .exp-badge .lbl{font-size:.75rem;font-weight:700}
 .about .eyebrow{color:var(--gold)}
 .about .section-title{color:#fff}
-.about-text{color:#b9ae91;font-size:.98rem}
+.about-text{color:#c0a98d;font-size:.98rem}
 .about-points{margin:20px 0 0;display:grid;gap:11px}
-.about-points li{display:flex;align-items:center;gap:10px;color:#e0d6ba;font-size:.92rem}
+.about-points li{display:flex;align-items:center;gap:10px;color:#e4d7c2;font-size:.92rem}
 .about-points svg{color:var(--gold);flex:none}
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px}
 .stat{
-  background:rgba(255,255,255,.04);border:1px solid rgba(217,182,78,.2);
+  background:rgba(255,255,255,.04);border:1px solid rgba(230,180,95,.2);
   border-radius:14px;padding:18px 12px;text-align:center;
 }
 .stat .num{font-size:1.5rem;font-weight:900;color:var(--gold);line-height:1.6}
-.stat .lbl{font-size:.78rem;color:#b9ae91}
+.stat .lbl{font-size:.78rem;color:#c0a98d}
 
 /* ============ بنر CTA ============ */
 .cta{padding:72px 0}
@@ -463,7 +454,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
 .blog-section .posts-grid{grid-template-columns:repeat(3,1fr)}
 .post-card{
-  background:#fff;border:1px solid rgba(201,162,39,.16);border-radius:var(--radius);
+  background:#fff;border:1px solid rgba(194,144,60,.16);border-radius:var(--radius);
   overflow:hidden;transition:.25s;display:flex;flex-direction:column;
 }
 .post-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);border-color:var(--gold)}
@@ -485,9 +476,9 @@ html.js .reveal.in-view{opacity:1;transform:none}
 
 /* ============ سربرگ برگه‌ها و آرشیو ============ */
 .page-head{
-  position:relative;overflow:hidden;text-align:center;padding:60px 20px;color:#e9e2cd;
+  position:relative;overflow:hidden;text-align:center;padding:60px 20px;color:#e9dcc6;
   background:
-    radial-gradient(700px 300px at 50% -30%,rgba(217,182,78,.22),transparent 65%),
+    radial-gradient(700px 300px at 50% -30%,rgba(230,180,95,.22),transparent 65%),
     var(--ink);
 }
 .page-head::before{
@@ -496,8 +487,8 @@ html.js .reveal.in-view{opacity:1;transform:none}
 }
 .page-head>*{position:relative}
 .page-title{color:#fff;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:4px}
-.page-desc{color:#b9ae91;margin:0;font-size:.92rem}
-.breadcrumb{color:#b9ae91;font-size:.84rem;margin-top:10px}
+.page-desc{color:#c0a98d;margin:0;font-size:.92rem}
+.breadcrumb{color:#c0a98d;font-size:.84rem;margin-top:10px}
 .breadcrumb a:hover{color:var(--gold)}
 
 /* ============ چیدمان لیست + ستون کناری ============ */
@@ -521,7 +512,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 
 /* ============ ستون کناری ============ */
 .widget-area .widget{
-  background:#fff;border:1px solid rgba(201,162,39,.16);border-radius:var(--radius);
+  background:#fff;border:1px solid rgba(194,144,60,.16);border-radius:var(--radius);
   padding:24px;margin-bottom:24px;
 }
 .widget-title{font-size:1rem;margin-bottom:16px;padding-bottom:11px;border-bottom:2px solid var(--paper-2);position:relative}
@@ -542,7 +533,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .entry-meta svg{color:var(--gold-strong)}
 .entry-thumb{margin:28px 0}
 .entry-thumb img{border-radius:var(--radius);width:100%}
-.entry-content{font-size:1rem;line-height:2.15;color:#3a3222}
+.entry-content{font-size:1rem;line-height:2.15;color:#3b2a1e}
 .entry-content p{margin:0 0 1.25em}
 .entry-content a{color:var(--gold-strong);font-weight:600;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px}
 .entry-content a:hover{color:var(--ink)}
@@ -553,12 +544,12 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .entry-content li{margin-bottom:.4em}
 .entry-content blockquote{
   border-right:4px solid var(--gold);background:#fff;border-radius:12px;
-  padding:20px 24px;margin:0 0 1.25em;color:#57502f;box-shadow:var(--shadow-sm);
+  padding:20px 24px;margin:0 0 1.25em;color:#5d4530;box-shadow:var(--shadow-sm);
 }
 .entry-content blockquote p:last-child{margin:0}
 .entry-content table{width:100%;border-collapse:collapse;margin-bottom:1.25em}
 .entry-content table td,.entry-content table th{border:1px solid var(--line);padding:10px 12px}
-.entry-content pre{background:var(--ink);color:#e9e2cd;border-radius:12px;padding:20px;overflow:auto;direction:ltr;text-align:left}
+.entry-content pre{background:var(--ink);color:#e9dcc6;border-radius:12px;padding:20px;overflow:auto;direction:ltr;text-align:left}
 .entry-content code{background:var(--paper-2);border-radius:6px;padding:2px 7px;font-size:.9em}
 .entry-content .wp-caption-text{font-size:.8rem;color:var(--muted);text-align:center}
 .tags{display:flex;gap:9px;flex-wrap:wrap;margin-top:32px}
@@ -615,7 +606,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
   justify-self:start;background:var(--grad-gold);color:var(--gold-ink);border:0;
   border-radius:999px;padding:13px 34px;font-weight:800;cursor:pointer;transition:.25s;
 }
-.comment-form .submit:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(201,162,39,.4)}
+.comment-form .submit:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(194,144,60,.4)}
 
 /* ============ ۴۰۴ و جستجو ============ */
 .error-404{text-align:center;padding:100px 20px;max-width:620px;margin-inline:auto}
@@ -628,7 +619,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .error-404 .search-form{max-width:440px;margin:26px auto 0}
 
 /* ============ فوتر ============ */
-.site-footer{background:var(--ink);color:#c9bfa4;border-top:1px solid rgba(217,182,78,.28)}
+.site-footer{background:var(--ink);color:#c8b39a;border-top:1px solid rgba(230,180,95,.28)}
 .footer-grid{display:grid;grid-template-columns:1.35fr 1fr 1.25fr;gap:44px;padding:64px 20px 44px}
 .footer-title{color:var(--gold);font-size:1rem;margin-bottom:20px;position:relative;padding-bottom:11px}
 .footer-title::after{content:"";position:absolute;right:0;bottom:0;width:38px;height:2px;background:var(--grad-gold)}
@@ -645,10 +636,10 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .footer-socials{display:flex;gap:10px;margin-top:20px}
 .footer-socials a{
   width:42px;height:42px;display:grid;place-items:center;
-  border:1px solid rgba(217,182,78,.32);border-radius:13px;transition:.2s;color:#c9bfa4;
+  border:1px solid rgba(230,180,95,.32);border-radius:13px;transition:.2s;color:#c8b39a;
 }
 .footer-socials a:hover{background:var(--grad-gold);color:var(--gold-ink);border-color:transparent}
-.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding:19px 0;font-size:.8rem;color:#8d8163;text-align:center}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding:19px 0;font-size:.8rem;color:#9c8367;text-align:center}
 .footer-bottom a{color:var(--gold)}
 .footer-bottom a:hover{color:var(--gold-soft)}
 
@@ -656,7 +647,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
 .to-top{
   position:fixed;bottom:26px;left:26px;width:47px;height:47px;z-index:998;
   border-radius:14px;background:var(--grad-gold);color:var(--gold-ink);border:0;
-  cursor:pointer;display:grid;place-items:center;box-shadow:0 12px 26px rgba(201,162,39,.42);
+  cursor:pointer;display:grid;place-items:center;box-shadow:0 12px 26px rgba(194,144,60,.42);
   opacity:0;visibility:hidden;transform:translateY(16px);transition:.3s;
 }
 .to-top.show{opacity:1;visibility:visible;transform:none}
@@ -693,7 +684,7 @@ html.js .reveal.in-view{opacity:1;transform:none}
     position:static;opacity:1;visibility:visible;transform:none;
     background:transparent;box-shadow:none;border:0;padding:0 0 0 0;margin:0 0 6px 18px;min-width:0;
   }
-  .nav-list .sub-menu a{color:#cfc4a6;padding:9px 14px}
+  .nav-list .sub-menu a{color:#d0bda4;padding:9px 14px}
   .nav-list .sub-menu a:hover{background:rgba(255,255,255,.05);color:var(--gold)}
   .products-grid{grid-template-columns:repeat(2,1fr)}
   .footer-grid{grid-template-columns:1fr;gap:34px;padding:52px 20px 36px}
@@ -744,3 +735,28 @@ html.js .reveal.in-view{opacity:1;transform:none}
 @media (max-width:768px){
   .woocommerce-wrap{padding-top:30px;padding-bottom:52px}
 }
+
+
+/* ============ لهجه‌های اختصاصی دموی کاکائو ============ */
+.cta-banner{
+  background:
+    radial-gradient(600px 300px at 85% -20%,rgba(230,180,95,.28),transparent 62%),
+    linear-gradient(135deg,#2b1b12 0%,#5f371d 52%,#a4652a 100%);
+  color:#f3e7d6;
+}
+.cta-banner h2{color:#fdf6e8}
+.cta-banner p{color:rgba(243,231,214,.82)}
+.cta-banner .btn-dark{background:var(--grad-gold);color:var(--gold-ink)}
+.cta-banner .btn-dark:hover{background:var(--gold-strong);color:var(--gold-ink)}
+.prices-strip{position:relative}
+.prices-strip::before{
+  content:"";position:absolute;top:0;right:0;left:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.6;
+}
+.hero::after{
+  content:"";position:absolute;inset:auto 0 0 0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(230,180,95,.55),transparent);
+}
+.feature{background:linear-gradient(180deg,#fff,var(--paper));border-color:rgba(194,144,60,.2)}
+.brand-mark{border-radius:16px 16px 16px 5px;box-shadow:0 4px 18px rgba(179,118,44,.45)}
+.footer-title::after{background:linear-gradient(90deg,var(--gold),transparent)}

@@ -1,17 +1,8 @@
 /*
-Theme Name: زرین | قالب فروشگاه طلا
-Theme URI: https://github.com/ahoseiny270-create/zarrin-gold-theme
-Author: ahoseiny270-create
-Author URI: https://github.com/ahoseiny270-create
-Description: قالب فروشگاهی لوکس مخصوص طلا‌فروشی و جواهرفی — کاملاً راست‌چین و فارسی، سازگار با ووکامرس، دارای تیکر قیمت طلا و سکه، بخش معرفی فروشگاه، خدمات، وبلاگ و تنظیمات اختصاصی در سفارشی‌سازی.
-Version: 1.2.0
-Requires at least: 6.0
-Requires PHP: 7.4
-License: GNU General Public License v2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Text Domain: zarrin
-Tags: e-commerce, rtl-language-support, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
-*/
+ * پوسته رنگ «زرین روشن (دموی ۲)» — این فایل جایگزین کامل style.css می‌شود؛
+ * از «نمایش ← سفارشی‌سازی ← ظاهر سایت» انتخاب کنید.
+ */
+
 
 /* ============ متغیرها و پایه ============ */
 :root{
@@ -717,30 +708,69 @@ html.js .reveal.in-view{opacity:1;transform:none}
   .author-box{flex-direction:column;text-align:center}
 }
 
+/* =========================================================
+   تم روشن — لایه بازنویسی (نسخه سفید-عاجی لوکس)
+   ========================================================= */
+:root{
+  --paper:#fdfcf8;
+  --paper-2:#f6f1e4;
+  --line:rgba(201,162,39,.32);
+  --text:#3a3222;
+}
+body{background:#fdfcf8;color:#3a3222}
 
-/* ============ تکمیل سازگاری (نسخه ۱.۳) ============ */
-.hero-content,.about-content{position:relative;z-index:1;min-width:0}
-.footer-col{min-width:0}
-.live-value{font-variant-numeric:tabular-nums}
-.live-updated{color:var(--gold-soft);font-weight:700}
-.woocommerce-wrap{padding-top:46px;padding-bottom:70px}
-.page-links{margin:22px 0;font-weight:700;color:var(--muted)}
-.page-links a{
-  display:inline-grid;place-items:center;min-width:34px;height:34px;margin-inline:3px;
-  border-radius:10px;border:1px solid var(--line);background:#fff;
+/* هدر سفید */
+.site-header{background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);box-shadow:0 2px 14px rgba(31,26,18,.05)}
+.site-header.scrolled{box-shadow:0 12px 30px rgba(31,26,18,.12)}
+.brand-name{color:var(--ink)}
+.brand-tag{color:#a8841c}
+.nav-list a{color:#4a4231}
+.nav-list a:hover,.nav-list .current-menu-item>a,.nav-list .current_page_item>a{color:var(--gold-strong)}
+.icon-btn{color:#4a4231;border-color:var(--line)}
+.icon-btn:hover{color:var(--gold-strong);border-color:var(--gold-strong)}
+
+/* هیرو روشن */
+.hero{color:var(--ink);
+  background:
+    radial-gradient(900px 420px at 85% -10%,rgba(217,182,78,.22),transparent 60%),
+    radial-gradient(700px 400px at 8% 115%,rgba(217,182,78,.12),transparent 60%),
+    #fdfcf8;
 }
-.page-links a:hover{border-color:var(--gold);color:var(--gold-strong)}
-.post-nav .nav-previous,.post-nav .nav-next{flex:1;display:block}
-.post-nav .nav-previous a,.post-nav .nav-next a{display:block}
-.comment-form-comment{grid-column:1/-1}
-.comment-form-comment textarea{min-height:130px;resize:vertical}
-.entry-content .alignright{float:left;margin:0 0 1em 1.5em}
-.entry-content .alignleft{float:right;margin:0 1.5em 1em 0}
-.entry-content .aligncenter{display:block;margin-inline:auto}
-.entry-content .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:1.25em}
-.entry-content .gallery-item{margin:0}
-.entry-content table th{background:var(--paper-2)}
-.comment-list .bypostauthor>.comment-body{border-color:var(--gold)}
-@media (max-width:768px){
-  .woocommerce-wrap{padding-top:30px;padding-bottom:52px}
+.hero::before{opacity:.45}
+.hero-title{color:var(--ink)}
+.hero-sub{color:#7a705c}
+.btn-ghost{color:var(--gold-strong);border-color:rgba(201,162,39,.55)}
+.btn-ghost:hover{background:rgba(217,182,78,.12);color:var(--ink)}
+.hero-media .frame{box-shadow:0 30px 70px rgba(31,26,18,.2)}
+.float-card{background:rgba(255,255,255,.97);border:1px solid var(--line);box-shadow:0 14px 34px rgba(31,26,18,.12)}
+.float-card .fc-label{color:#7a705c}
+.float-card .fc-value{color:var(--gold-strong)}
+
+/* نوار قیمت روشن */
+.prices-strip{background:linear-gradient(180deg,#ffffff,var(--paper));border-bottom:1px solid var(--line)}
+.price-card{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-sm)}
+.p-label{color:#7a705c}
+.p-value{color:var(--ink)}
+.p-unit{color:var(--gold-strong)}
+.prices-note{color:#9a8f75}
+
+/* درباره ما روشن */
+.about{color:var(--ink);background:linear-gradient(180deg,var(--paper-2),#fdfcf8)}
+.about::before{opacity:.35}
+.about .section-title{color:var(--ink)}
+.about-text{color:#6d6450}
+.about-points li{color:#4a4231}
+.stat{background:#fff;border:1px solid var(--line)}
+.stat .lbl{color:#7a705c}
+.about-media img{box-shadow:0 26px 60px rgba(31,26,18,.16)}
+
+/* سربرگ برگه‌ها روشن */
+.page-head{color:var(--ink);
+  background:
+    radial-gradient(700px 300px at 50% -30%,rgba(217,182,78,.18),transparent 65%),
+    var(--paper-2);
 }
+.page-title{color:var(--ink)}
+.page-desc,.breadcrumb{color:#7a705c}
+
+/* فوتر تیره می‌ماند — لنگر بصری صفحه */

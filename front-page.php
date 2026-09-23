@@ -7,7 +7,7 @@
 
 get_header();
 
-$zarrin_hero_img   = zarrin_get( 'zarrin_hero_img', get_template_directory_uri() . '/assets/img/hero.jpg' );
+$zarrin_hero_img   = zarrin_get( 'zarrin_hero_img', zarrin_skin_img( 'hero.jpg' ) );
 $zarrin_btn1_text  = zarrin_get( 'zarrin_hero_btn1_text', 'مشاهده محصولات' );
 $zarrin_btn1_url   = zarrin_get( 'zarrin_hero_btn1_url' );
 $zarrin_btn2_text  = zarrin_get( 'zarrin_hero_btn2_text', 'تماس با ما' );
@@ -187,7 +187,7 @@ endif;
 <section class="about" id="about">
 	<div class="container about-inner">
 		<div class="about-media reveal">
-			<img src="<?php echo esc_url( zarrin_get( 'zarrin_about_img', get_template_directory_uri() . '/assets/img/about.jpg' ) ); ?>" alt="<?php echo esc_attr( zarrin_get( 'zarrin_about_title', 'درباره ما' ) ); ?>" loading="lazy">
+			<img src="<?php echo esc_url( zarrin_get( 'zarrin_about_img', zarrin_skin_img( 'about.jpg' ) ) ); ?>" alt="<?php echo esc_attr( zarrin_get( 'zarrin_about_title', 'درباره ما' ) ); ?>" loading="lazy">
 			<div class="exp-badge">
 				<span class="num"><?php echo esc_html( zarrin_get( 'zarrin_stat_years', '۲۵' ) ); ?></span>
 				<span class="lbl"><?php echo esc_html( zarrin_get( 'zarrin_stat_years_lbl', 'سال تجربه' ) ); ?></span>
