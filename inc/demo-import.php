@@ -393,11 +393,15 @@ function zarrin_run_demo_import() {
 	set_theme_mod( 'zarrin_instagram', 'https://instagram.com/' );
 	set_theme_mod( 'zarrin_telegram', 'https://t.me/' );
 	set_theme_mod( 'zarrin_whatsapp', 'https://wa.me/989123456789' );
-	set_theme_mod( 'zarrin_footer_about', 'طلافروشی زرین؛ عرضه‌کننده انواع طلا و جواهر با ضمانت اصالت، قیمت لحظه‌ای روز و امکان معاوضه. خرید شما را با خیال راحت انجام دهید.' );
+	$zarrin_preset = zarrin_skin_presets();
+	set_theme_mod( 'zarrin_footer_about', $zarrin_preset['footer_about'] );
+	set_theme_mod( 'zarrin_cta_title', $zarrin_preset['cta_title'] );
+	set_theme_mod( 'zarrin_cta_sub', $zarrin_preset['cta_sub'] );
+	set_theme_mod( 'zarrin_about_text', $zarrin_preset['about_text'] );
 
 	/* --- ۷) تنظیمات کلی وردپرس --- */
-	update_option( 'blogname', 'طلا و جواهر زرین' );
-	update_option( 'blogdescription', 'فروشگاه آنلاین طلا و جواهر با قیمت لحظه‌ای' );
+	update_option( 'blogname', $zarrin_preset['blogname'] );
+	update_option( 'blogdescription', $zarrin_preset['blogdescription'] );
 	update_option( 'permalink_structure', '/%postname%/' );
 	flush_rewrite_rules();
 
