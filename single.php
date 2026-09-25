@@ -40,6 +40,8 @@ while ( have_posts() ) :
 
 		<?php the_tags( '<div class="tags">', '', '</div>' ); ?>
 
+		<?php do_action( 'zarrin_after_post_content' ); ?>
+
 		<nav class="post-nav" aria-label="نوشته بعدی و قبلی">
 			<?php
 			previous_post_link( '<span class="nav-previous">%link</span>', '<span class="nav-label">نوشته قبلی</span> %title' );

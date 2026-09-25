@@ -25,32 +25,117 @@ if ( ! $zarrin_btn2_url ) {
 }
 ?>
 
-<!-- ================= هیرو ================= -->
-<section class="hero">
-	<div class="container hero-inner">
-		<div class="hero-content reveal in-view">
-			<span class="hero-eyebrow"><?php zarrin_icon_e( 'diamond', 15 ); ?><?php echo esc_html( zarrin_get( 'zarrin_hero_eyebrow', 'طلا و جواهر زرین — از سال ۱۳۷۵' ) ); ?></span>
-			<h1 class="hero-title"><?php echo wp_kses_post( zarrin_get( 'zarrin_hero_title', 'درخشش طلای اصیل، زیبایی ماندگار شما' ) ); ?></h1>
-			<p class="hero-sub"><?php echo esc_html( zarrin_get( 'zarrin_hero_sub', 'مجموعه‌ای نفیس از طلای ۱۸ و ۲۴ عیار با ضمانت اصالت، قیمت روز و امکان معاوضه.' ) ); ?></p>
-			<div class="hero-actions">
-				<a class="btn btn-gold" href="<?php echo esc_url( $zarrin_btn1_url ); ?>"><?php echo esc_html( $zarrin_btn1_text ); ?></a>
-				<a class="btn btn-ghost" href="<?php echo esc_url( $zarrin_btn2_url ); ?>"><?php echo esc_html( $zarrin_btn2_text ); ?></a>
+<?php
+/* ---------- اسلایدهای هیرو ---------- */
+$zarrin_slides      = array_values( zarrin_slider_slides() );
+$zarrin_slide_count = count( $zarrin_slides );
+$zarrin_slider_on   = (bool) zarrin_get( 'zarrin_slider_enable', true );
+$zarrin_hero_p18    = zarrin_get_prices();
+?>
+
+<!-- ================= هیرو — اسلایدر چنداسلایدی ================= -->
+<section class="hero" aria-label="<?php esc_attr_e( 'بنر اصلی', 'zarrin' ); ?>">
+	<div class="container">
+	<?php if ( $zarrin_slider_on && $zarrin_slide_count > 1 ) : ?>
+		<div class="zslider" data-zslider data-autoplay="7000" aria-roledescription="اسلایدر">
+			<div class="zslider-track">
+				<?php
+				foreach ( $zarrin_slides as $zarrin_zi => $zarrin_zs ) :
+					$zarrin_tag = ( 0 === $zarrin_zi ) ? 'h1' : 'h2';
+					$zarrin_b1  = $zarrin_zs['btn1_url'] ? $zarrin_zs['btn1_url'] : $zarrin_btn1_url;
+					$zarrin_b2  = $zarrin_zs['btn2_url'] ? $zarrin_zs['btn2_url'] : $zarrin_btn2_url;
+					?>
+					<div class="zslide hero-inner<?php echo 0 === $zarrin_zi ? ' is-active' : ''; ?>"
+						role="group" aria-roledescription="اسلاید"
+						aria-label="<?php echo esc_attr( 'اسلاید ' . zarrin_fa_digits( $zarrin_zi + 1 ) . ' از ' . zarrin_fa_digits( $zarrin_slide_count ) ); ?>">
+						<div class="hero-content">
+							<span class="hero-eyebrow"><?php zarrin_icon_e( 'diamond', 15 ); ?><?php echo esc_html( $zarrin_zs['eyebrow'] ); ?></span>
+							<<?php echo esc_html( $zarrin_tag ); ?> class="hero-title"><?php echo wp_kses_post( $zarrin_zs['title'] ); ?></<?php echo esc_html( $zarrin_tag ); ?>>
+							<p class="hero-sub"><?php echo esc_html( $zarrin_zs['sub'] ); ?></p>
+							<div class="hero-actions">
+								<a class="btn btn-gold" href="<?php echo esc_url( $zarrin_b1 ); ?>"><?php echo esc_html( $zarrin_zs['btn1_text'] ); ?></a>
+								<a class="btn btn-ghost" href="<?php echo esc_url( $zarrin_b2 ); ?>"><?php echo esc_html( $zarrin_zs['btn2_text'] ); ?></a>
+							</div>
+						</div>
+
+						<div class="hero-media">
+							<div class="frame">
+								<img src="<?php echo esc_url( $zarrin_zs['img'] ); ?>" alt="<?php echo esc_attr( $zarrin_zs['title'] ); ?>" loading="<?php echo 0 === $zarrin_zi ? 'eager' : 'lazy'; ?>">
+							</div>
+							<?php if ( $zarrin_zs['show_price'] ) : ?>
+								<div class="float-card" data-live-item="p18">
+									<span class="fc-label"><?php zarrin_icon_e( 'coin', 15 ); ?>قیمت امروز گرم طلای ۱۸<?php if ( $zarrin_hero_p18['_live'] ) : ?><span class="live-dot" title="لحظه‌ای"></span><?php endif; ?></span>
+									<span class="fc-value live-value"><?php echo esc_html( zarrin_money( $zarrin_hero_p18['p18']['value'] ) ); ?> <small>تومان</small></span>
+									<span class="fc-badge">به‌روزرسانی: <span class="live-updated"><?php echo esc_html( $zarrin_hero_p18['_updated'] ); ?></span></span>
+									<span class="live-change"><?php echo zarrin_change_badge( $zarrin_hero_p18['p18']['change'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+								</div>
+							<?php endif; ?>
+						</div>
+					</div>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="zslider-ui">
+				<button type="button" class="zslider-nav zprev" aria-label="اسلاید قبلی">&#8249;</button>
+				<div class="zslider-dots" role="tablist" aria-label="انتخاب اسلاید"></div>
+				<button type="button" class="zslider-nav znext" aria-label="اسلاید بعدی">&#8250;</button>
 			</div>
 		</div>
-		<div class="hero-media reveal in-view">
-			<div class="frame">
-				<img src="<?php echo esc_url( $zarrin_hero_img ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" loading="eager">
+
+	<?php else : ?>
+		<?php /* حالت تک‌اسلایدی (وقتی اسلایدر خاموش است) */ ?>
+		<div class="hero-inner">
+			<div class="hero-content reveal in-view">
+				<span class="hero-eyebrow"><?php zarrin_icon_e( 'diamond', 15 ); ?><?php echo esc_html( zarrin_get( 'zarrin_hero_eyebrow', 'طلا و جواهر زرین — از سال ۱۳۷۵' ) ); ?></span>
+				<h1 class="hero-title"><?php echo wp_kses_post( zarrin_get( 'zarrin_hero_title', 'درخشش طلای اصیل، زیبایی ماندگار شما' ) ); ?></h1>
+				<p class="hero-sub"><?php echo esc_html( zarrin_get( 'zarrin_hero_sub', 'مجموعه‌ای نفیس از طلای ۱۸ و ۲۴ عیار با ضمانت اصالت، قیمت روز و امکان معاوضه.' ) ); ?></p>
+				<div class="hero-actions">
+					<a class="btn btn-gold" href="<?php echo esc_url( $zarrin_btn1_url ); ?>"><?php echo esc_html( $zarrin_btn1_text ); ?></a>
+					<a class="btn btn-ghost" href="<?php echo esc_url( $zarrin_btn2_url ); ?>"><?php echo esc_html( $zarrin_btn2_text ); ?></a>
+				</div>
 			</div>
-			<?php $zarrin_hero_p18 = zarrin_get_prices(); ?>
-			<div class="float-card" data-live-item="p18">
-				<span class="fc-label"><?php zarrin_icon_e( 'coin', 15 ); ?>قیمت امروز گرم طلای ۱۸<?php if ( $zarrin_hero_p18['_live'] ) : ?><span class="live-dot" title="لحظه‌ای"></span><?php endif; ?></span>
-				<span class="fc-value live-value"><?php echo esc_html( zarrin_money( $zarrin_hero_p18['p18']['value'] ) ); ?> <small>تومان</small></span>
-				<span class="fc-badge">به‌روزرسانی: <span class="live-updated"><?php echo esc_html( $zarrin_hero_p18['_updated'] ); ?></span></span>
-				<span class="live-change"><?php echo zarrin_change_badge( $zarrin_hero_p18['p18']['change'] ); // phpcs:ignore ?></span>
+			<div class="hero-media reveal in-view">
+				<div class="frame">
+					<img src="<?php echo esc_url( $zarrin_hero_img ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" loading="eager">
+				</div>
+				<div class="float-card" data-live-item="p18">
+					<span class="fc-label"><?php zarrin_icon_e( 'coin', 15 ); ?>قیمت امروز گرم طلای ۱۸<?php if ( $zarrin_hero_p18['_live'] ) : ?><span class="live-dot" title="لحظه‌ای"></span><?php endif; ?></span>
+					<span class="fc-value live-value"><?php echo esc_html( zarrin_money( $zarrin_hero_p18['p18']['value'] ) ); ?> <small>تومان</small></span>
+					<span class="fc-badge">به‌روزرسانی: <span class="live-updated"><?php echo esc_html( $zarrin_hero_p18['_updated'] ); ?></span></span>
+					<span class="live-change"><?php echo zarrin_change_badge( $zarrin_hero_p18['p18']['change'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+				</div>
 			</div>
 		</div>
+	<?php endif; ?>
 	</div>
 </section>
+
+<?php if ( zarrin_get( 'zarrin_marquee_enable', true ) ) : ?>
+<!-- ================= تیکر متحرک نرخ طلا ================= -->
+<div class="zmarquee" aria-label="<?php esc_attr_e( 'نرخ لحظه‌ای طلا و سکه', 'zarrin' ); ?>">
+	<div class="zmarquee-inner">
+		<?php
+		$zarrin_ticker_map = array(
+			'p18'     => array( 'طلای ۱۸ عیار', 'coin' ),
+			'p24'     => array( 'طلای ۲۴ عیار', 'coin' ),
+			'coin'    => array( 'سکه امامی', 'award' ),
+			'mesghal' => array( 'مثقال طلا', 'diamond' ),
+		);
+		foreach ( $zarrin_ticker_map as $zarrin_tkey => $zarrin_tinfo ) :
+			$zarrin_titem = $zarrin_hero_p18[ $zarrin_tkey ];
+			?>
+			<span class="zmarquee-item">
+				<?php zarrin_icon_e( $zarrin_tinfo[1], 15 ); ?>
+				<?php echo esc_html( $zarrin_tinfo[0] ); ?>:
+				<b class="live-value" data-fa-num><?php echo esc_html( zarrin_money( $zarrin_titem['value'] ) ); ?></b>
+				تومان <?php echo zarrin_change_badge( $zarrin_titem['change'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			</span>
+		<?php endforeach; ?>
+		<span class="zmarquee-item"><?php zarrin_icon_e( 'shield', 15 ); ?>خرید با ضمانت اصالت و مهر عیار — ارسال بیمه‌شده</span>
+		<span class="zmarquee-item"><?php zarrin_icon_e( 'exchange', 15 ); ?>معاوضه طلا با طلا بدون محاسبه اجرت قبلی</span>
+	</div>
+</div>
+<?php endif; ?>
 
 <!-- ================= نوار قیمت لحظه‌ای ================= -->
 <section class="prices-strip" aria-label="قیمت لحظه‌ای طلا و سکه">
@@ -183,6 +268,57 @@ if ( $zarrin_show_products ) :
 endif;
 ?>
 
+<?php if ( zarrin_get( 'zarrin_testi_enable', true ) ) : ?>
+<!-- ================= نظرات مشتریان — اسلایدر ================= -->
+<section class="ztesti section" aria-label="<?php esc_attr_e( 'نظرات مشتریان', 'zarrin' ); ?>">
+	<div class="container">
+		<div class="section-head reveal">
+			<span class="eyebrow">تجربه خرید مشتریان</span>
+			<h2 class="section-title">آن‌چه مشتریان ما می‌گویند</h2>
+			<p class="section-sub">بیش از ۱۲ هزار خرید موفق طلا، با ضمانت اصالت و شفافیت قیمت</p>
+			<div class="ornament"><?php zarrin_icon_e( 'diamond', 16 ); ?></div>
+		</div>
+
+		<?php $zarrin_testi_chunks = array_chunk( zarrin_testimonials(), 2 ); ?>
+		<div class="zslider" data-zslider data-autoplay="9000">
+			<div class="zslider-track">
+				<?php foreach ( $zarrin_testi_chunks as $zarrin_ti => $zarrin_chunk ) : ?>
+					<div class="zslide<?php echo 0 === $zarrin_ti ? ' is-active' : ''; ?>" role="group" aria-roledescription="اسلاید" aria-label="<?php echo esc_attr( 'نظرات ' . zarrin_fa_digits( $zarrin_ti + 1 ) ); ?>">
+						<?php foreach ( $zarrin_chunk as $zarrin_row ) : ?>
+							<figure class="ztesti-card reveal">
+								<span class="ztesti-quote">”</span>
+								<blockquote class="ztesti-text"><?php echo esc_html( $zarrin_row[3] ); ?></blockquote>
+								<figcaption class="ztesti-meta">
+									<span class="ztesti-avatar"><?php echo esc_html( mb_substr( $zarrin_row[0], 0, 1 ) ); ?></span>
+									<span>
+										<span class="ztesti-name"><?php echo esc_html( $zarrin_row[0] ); ?></span>
+										<span class="ztesti-city"><?php echo esc_html( $zarrin_row[1] ); ?></span>
+									</span>
+									<span class="ztesti-stars" aria-label="<?php echo esc_attr( 'امتیاز ' . zarrin_fa_digits( $zarrin_row[2] ) . ' از ۵' ); ?>">
+										<?php
+										$zarrin_stars = max( 1, min( 5, (int) zarrin_parse_fa_number( $zarrin_row[2] ) ) );
+										echo esc_html( str_repeat( '★', $zarrin_stars ) );
+										?>
+									</span>
+								</figcaption>
+							</figure>
+						<?php endforeach; ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+
+			<?php if ( count( $zarrin_testi_chunks ) > 1 ) : ?>
+				<div class="zslider-ui">
+					<button type="button" class="zslider-nav zprev" aria-label="نظرات قبلی">&#8249;</button>
+					<div class="zslider-dots" role="tablist" aria-label="انتخاب اسلاید"></div>
+					<button type="button" class="zslider-nav znext" aria-label="نظرات بعدی">&#8250;</button>
+				</div>
+			<?php endif; ?>
+		</div>
+	</div>
+</section>
+<?php endif; ?>
+
 <!-- ================= درباره ما ================= -->
 <section class="about" id="about">
 	<div class="container about-inner">
@@ -235,6 +371,49 @@ endif;
 		</div>
 	</div>
 </section>
+
+<?php if ( zarrin_get( 'zarrin_faq_enable', true ) ) : ?>
+<!-- ================= سوالات متداول + محاسبه‌گر قیمت ================= -->
+<section class="section" id="faq" aria-label="<?php esc_attr_e( 'سوالات متداول و محاسبه‌گر قیمت', 'zarrin' ); ?>">
+	<div class="container">
+		<div class="section-head reveal">
+			<span class="eyebrow">پیش از خرید بخوانید</span>
+			<h2 class="section-title">سوالات متداول خرید طلا</h2>
+			<p class="section-sub">پاسخ شفاف به پرتکرارترین سوال‌های مشتریان درباره قیمت، اصالت و ارسال</p>
+			<div class="ornament"><?php zarrin_icon_e( 'diamond', 16 ); ?></div>
+		</div>
+
+		<div class="zfaq">
+			<?php foreach ( zarrin_faqs() as $zarrin_faq ) : ?>
+				<details class="zfaq-item reveal">
+					<summary><?php echo esc_html( $zarrin_faq[0] ); ?></summary>
+					<div class="zfaq-body"><?php echo esc_html( $zarrin_faq[1] ); ?></div>
+				</details>
+			<?php endforeach; ?>
+		</div>
+
+		<?php if ( function_exists( 'zarrin_gold_calc_html' ) ) : ?>
+			<div class="z-cta-grid" style="margin-top:44px">
+				<div class="reveal">
+					<span class="eyebrow">شفافیت قیمت</span>
+					<h3 class="section-title" style="font-size:1.35rem">قیمت طلای خود را همین حالا حساب کنید</h3>
+					<p class="section-sub" style="text-align:right;margin-inline:0">
+						قیمت هر قطعه طلا در فروشگاه زرین از این فرمول ساده به‌دست می‌آید:
+						<b>(وزن × نرخ گرم روز) + اجرت ساخت + سود فروشگاه</b>.
+						با محاسبه‌گر زیر می‌توانید پیش از خرید، هزینه تقریبی را برآورد کنید.
+					</p>
+					<ul class="about-points" style="margin-top:16px">
+						<li><?php zarrin_icon_e( 'check', 18 ); ?>نرخ گرم طلا به‌صورت خودکار از بازار به‌روزرسانی می‌شود</li>
+						<li><?php zarrin_icon_e( 'check', 18 ); ?>اجرت ساخت و سود فروش، در فاکتور شفاف ذکر می‌شود</li>
+						<li><?php zarrin_icon_e( 'check', 18 ); ?>قیمت نهایی هنگام ثبت سفارش قطعی و قابل استعلام است</li>
+					</ul>
+				</div>
+				<?php echo zarrin_gold_calc_html(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			</div>
+		<?php endif; ?>
+	</div>
+</section>
+<?php endif; ?>
 
 <!-- ================= آخرین مطالب وبلاگ ================= -->
 <?php

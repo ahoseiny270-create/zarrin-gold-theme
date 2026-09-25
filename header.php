@@ -87,6 +87,45 @@
 				)
 			);
 			?>
+			<?php /* پاورقی کشوی همبرگری — فقط در موبایل نمایش داده می‌شود */ ?>
+			<div class="drawer-foot">
+				<a class="drawer-cta" href="<?php echo esc_url( zarrin_is_woo() && get_option( 'woocommerce_shop_page_id' ) ? get_permalink( get_option( 'woocommerce_shop_page_id' ) ) : home_url( '/' ) ); ?>">
+					<?php zarrin_icon_e( 'cart', 18 ); ?> سفارش طلا و مشاهده فروشگاه
+				</a>
+
+				<ul class="drawer-contact">
+					<li>
+						<?php zarrin_icon_e( 'phone', 17 ); ?>
+						<a href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $zarrin_phone ) ); ?>"><?php echo esc_html( $zarrin_phone ); ?></a>
+					</li>
+					<li>
+						<?php zarrin_icon_e( 'whatsapp', 17 ); ?>
+						<a target="_blank" rel="noopener" href="https://wa.me/<?php echo esc_attr( preg_replace( '/[^0-9]/', '', zarrin_get( 'zarrin_whatsapp_num', '989123456789' ) ) ); ?>">مشاوره خرید در واتساپ</a>
+					</li>
+					<li>
+						<?php zarrin_icon_e( 'pin', 17 ); ?>
+						<span><?php echo esc_html( zarrin_get( 'zarrin_address', 'تهران، بازار بزرگ، سرای امیر، پلاک ۱۲' ) ); ?></span>
+					</li>
+					<li>
+						<?php zarrin_icon_e( 'clock', 17 ); ?>
+						<span><?php echo esc_html( zarrin_get( 'zarrin_hours', 'شنبه تا پنجشنبه — ۱۰ صبح تا ۸ شب' ) ); ?></span>
+					</li>
+				</ul>
+
+				<div class="drawer-socials">
+					<?php
+					foreach ( $zarrin_socials as $zarrin_sname => $zarrin_surl ) :
+						if ( $zarrin_surl ) :
+							?>
+							<a href="<?php echo esc_url( $zarrin_surl ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr( $zarrin_sname ); ?>">
+								<?php zarrin_icon_e( $zarrin_sname, 18 ); ?>
+							</a>
+							<?php
+						endif;
+					endforeach;
+					?>
+				</div>
+			</div>
 		</nav>
 
 		<div class="header-actions">
@@ -101,7 +140,7 @@
 				</a>
 			<?php endif; ?>
 
-			<button class="icon-btn nav-toggle" id="navToggle" aria-label="باز و بسته کردن منو" aria-expanded="false">
+			<button class="icon-btn nav-toggle" id="navToggle" aria-label="باز و بسته کردن منو" aria-controls="mainNav" aria-expanded="false">
 				<span></span><span></span><span></span>
 			</button>
 		</div>

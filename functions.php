@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ZARRIN_VERSION', '1.4.1' );
+define( 'ZARRIN_VERSION', '1.5.0' );
 
 /* =========================================================
  * ۱) راه‌اندازی قالب
@@ -105,8 +105,16 @@ add_action( 'widgets_init', 'zarrin_widgets_init' );
  * ======================================================= */
 function zarrin_assets() {
 
-	// پوسته رنگ فعال (دموی ۱ تا ۴) — هر پوسته یک استایل کامل است.
+	// پوسته رنگ فعال (دموی ۱ تا ۵) — هر پوسته یک استایل کامل است.
 	wp_enqueue_style( 'zarrin-style', zarrin_skin_css(), array(), ZARRIN_VERSION );
+
+	// کامپوننت‌های پیشرفته (اسلایدر، نظرات، محاسبه‌گر، صفحات ووکامرس) — بعد از پوسته.
+	wp_enqueue_style(
+		'zarrin-parts',
+		get_template_directory_uri() . '/assets/css/theme-parts.css',
+		array( 'zarrin-style' ),
+		ZARRIN_VERSION
+	);
 
 	// فونت وزیرمتن — لوکال (بدون نیاز به اینترنت/CDN).
 	wp_add_inline_style(
@@ -122,8 +130,10 @@ function zarrin_assets() {
 		'zarrinLive',
 		array(
 			'ajax'     => admin_url( 'admin-ajax.php' ),
-			'interval' => 90,
+			/* فاصله به‌روزرسانی مرورگر = همان فاصله تنظیم‌شده سرور (پیش‌فرض: هر ۱۰ دقیقه). */
+			'interval' => max( 1, (int) zarrin_get( 'zarrin_live_interval', 10 ) ) * 60,
 			'enabled'  => zarrin_live_enabled(),
+			'isWoo'    => zarrin_is_woo(),
 		)
 	);
 
@@ -281,9 +291,293 @@ function zarrin_skin_img( $file ) {
 /** افزودن کلاس پوسته به body */
 function zarrin_body_class( $classes ) {
 	$classes[] = 'zarrin-skin-' . zarrin_skin();
+
+	if ( ! zarrin_get( 'zarrin_sticky_atc_enable', true ) ) {
+		$classes[] = 'zarrin-no-sticky-atc';
+	}
+
 	return $classes;
 }
 add_filter( 'body_class', 'zarrin_body_class' );
+
+/* =========================================================
+ * ۵-۱) سئو، شبکه‌های اجتماعی و پیش‌بارگذاری فونت
+ * ======================================================= */
+
+/** پیش‌بارگذاری فونت وزیرمتن برای نمایش سریع‌تر متن فارسی */
+function zarrin_preload_font() {
+	printf(
+		'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+		esc_url( get_template_directory_uri() . '/assets/fonts/Vazirmatn-var.woff2' )
+	);
+}
+add_action( 'wp_head', 'zarrin_preload_font', 1 );
+
+/** توضیح متا، Open Graph و Twitter Card برای اشتراک‌گذاری در واتساپ/تلگرام */
+function zarrin_social_meta() {
+
+	if ( is_admin() || is_feed() ) {
+		return;
+	}
+
+	$title = wp_get_document_title();
+
+	if ( is_singular() ) {
+		$desc = get_the_excerpt();
+		if ( ! $desc ) {
+			$desc = wp_strip_all_tags( get_the_content() );
+		}
+		$desc = wp_trim_words( $desc, 30, '…' );
+	} else {
+		$desc = get_bloginfo( 'description' );
+		if ( ! $desc ) {
+			$desc = 'خرید طلا و جواهر با ضمانت اصالت، مهر عیار، قیمت روز و ارسال بیمه‌شده — ' . get_bloginfo( 'name' );
+		}
+	}
+
+	$image = '';
+	if ( is_singular() && has_post_thumbnail() ) {
+		$image = get_the_post_thumbnail_url( null, 'large' );
+	}
+	if ( ! $image ) {
+		$image = zarrin_skin_img( 'hero.jpg' );
+	}
+
+	echo '<meta name="description" content="' . esc_attr( $desc ) . '">' . "\n";
+	echo '<meta property="og:locale" content="fa_IR">' . "\n";
+	echo '<meta property="og:type" content="' . ( is_singular( 'product' ) ? 'product' : ( is_singular() ? 'article' : 'website' ) ) . '">' . "\n";
+	echo '<meta property="og:site_name" content="' . esc_attr( get_bloginfo( 'name' ) ) . '">' . "\n";
+	echo '<meta property="og:title" content="' . esc_attr( $title ) . '">' . "\n";
+	echo '<meta property="og:description" content="' . esc_attr( $desc ) . '">' . "\n";
+	echo '<meta property="og:url" content="' . esc_url( home_url( add_query_arg( array() ) ) ) . '">' . "\n";
+	if ( $image ) {
+		echo '<meta property="og:image" content="' . esc_url( $image ) . '">' . "\n";
+	}
+	echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+	echo '<meta name="twitter:title" content="' . esc_attr( $title ) . '">' . "\n";
+	echo '<meta name="twitter:description" content="' . esc_attr( $desc ) . '">' . "\n";
+	if ( $image ) {
+		echo '<meta name="twitter:image" content="' . esc_url( $image ) . '">' . "\n";
+	}
+}
+add_action( 'wp_head', 'zarrin_social_meta', 2 );
+
+/** داده‌های ساختاریافته فروشگاه طلا (WebSite + Organization + نرخ روز) */
+function zarrin_website_schema() {
+
+	if ( is_admin() ) {
+		return;
+	}
+
+	$prices = zarrin_get_prices();
+	$phone  = zarrin_get( 'zarrin_phone', '' );
+
+	$schema = array(
+		'@context' => 'https://schema.org',
+		'@graph'   => array(
+			array(
+				'@type'     => 'WebSite',
+				'@id'       => home_url( '/#website' ),
+				'url'       => home_url( '/' ),
+				'name'      => get_bloginfo( 'name' ),
+				'description' => get_bloginfo( 'description' ),
+				'inLanguage' => 'fa-IR',
+			),
+			array(
+				'@type'      => 'Store',
+				'@id'        => home_url( '/#store' ),
+				'name'       => get_bloginfo( 'name' ),
+				'url'        => home_url( '/' ),
+				'telephone'  => $phone,
+				'currenciesAccepted' => 'IRR',
+				'priceRange' => '$$',
+			),
+			array(
+				'@type'       => 'ItemList',
+				'name'        => 'نرخ لحظه‌ای طلا و سکه',
+				'itemListElement' => array(
+					array( '@type' => 'ListItem', 'position' => 1, 'name' => 'طلای ۱۸ عیار (هر گرم)', 'description' => zarrin_money( $prices['p18']['value'] ) . ' تومان' ),
+					array( '@type' => 'ListItem', 'position' => 2, 'name' => 'طلای ۲۴ عیار (هر گرم)', 'description' => zarrin_money( $prices['p24']['value'] ) . ' تومان' ),
+					array( '@type' => 'ListItem', 'position' => 3, 'name' => 'سکه امامی', 'description' => zarrin_money( $prices['coin']['value'] ) . ' تومان' ),
+					array( '@type' => 'ListItem', 'position' => 4, 'name' => 'مثقال طلا', 'description' => zarrin_money( $prices['mesghal']['value'] ) . ' تومان' ),
+				),
+			),
+		),
+	);
+
+	echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
+}
+add_action( 'wp_head', 'zarrin_website_schema', 22 );
+
+/** دکمه‌های اشتراک‌گذاری سریع (فقط در نوشته‌های وبلاگ) */
+function zarrin_share_buttons() {
+
+	if ( ! is_singular( 'post' ) ) {
+		return;
+	}
+
+	$url   = rawurlencode( get_permalink() );
+	$title = rawurlencode( get_the_title() );
+	?>
+	<div class="zshare">
+		<span class="zshare-title">اشتراک‌گذاری:</span>
+		<a target="_blank" rel="noopener" href="https://wa.me/?text=<?php echo esc_attr( $title . '%20' . $url ); ?>"><?php zarrin_icon_e( 'whatsapp', 17 ); ?> واتساپ</a>
+		<a target="_blank" rel="noopener" href="https://t.me/share/url?url=<?php echo esc_attr( $url ); ?>&text=<?php echo esc_attr( $title ); ?>"><?php zarrin_icon_e( 'telegram', 17 ); ?> تلگرام</a>
+		<a href="#" onclick="navigator.clipboard&&navigator.clipboard.writeText(location.href);this.textContent='لینک کپی شد';return false;"><?php zarrin_icon_e( 'check', 17 ); ?> کپی لینک</a>
+	</div>
+	<?php
+}
+add_action( 'zarrin_after_post_content', 'zarrin_share_buttons' );
+
+/* =========================================================
+ * ۵-۲) بلوک‌های چنداسلایدی و محتوای صفحه اصلی
+ * ======================================================= */
+
+/**
+ * اسلایدهای هیرو (سه اسلاید، قابل ویرایش در سفارشی‌سازی).
+ *
+ * @return array
+ */
+function zarrin_slider_slides() {
+
+	$defaults = array(
+		1 => array(
+			'eyebrow'    => 'طلا و جواهر زرین — از سال ۱۳۷۵',
+			'title'      => 'درخشش طلای اصیل، زیبایی ماندگار شما',
+			'sub'        => 'مجموعه‌ای نفیس از طلای ۱۸ و ۲۴ عیار با ضمانت اصالت، قیمت روز و امکان معاوضه.',
+			'img'        => 'hero.jpg',
+			'btn1_text'  => 'مشاهده محصولات',
+			'btn1_url'   => '',
+			'btn2_text'  => 'تماس با ما',
+			'btn2_url'   => '',
+			'show_price' => true,
+		),
+		2 => array(
+			'eyebrow'    => 'ضمانت اصالت و عیار',
+			'title'      => 'هر قطعه با شناسنامه و مهر عیار معتبر',
+			'sub'        => 'تمام محصولات دارای فاکتور رسمی، مهر عیار و ضمانت‌نامه کتبی اصالت هستند.',
+			'img'        => 'product-3.jpg',
+			'btn1_text'  => 'فروشگاه',
+			'btn1_url'   => '',
+			'btn2_text'  => 'درباره ما',
+			'btn2_url'   => '',
+			'show_price' => false,
+		),
+		3 => array(
+			'eyebrow'    => 'معاوضه و بازخرید',
+			'title'      => 'طلای قدیمی خود را با طرح نو معاوضه کنید',
+			'sub'        => 'امکان معاوضه طلا با طلا بدون محاسبه اجرت قبلی و بازخرید تضمینی محصولات فروشگاه.',
+			'img'        => 'about.jpg',
+			'btn1_text'  => 'شرایط معاوضه',
+			'btn1_url'   => '',
+			'btn2_text'  => 'تماس با کارشناس',
+			'btn2_url'   => '',
+			'show_price' => false,
+		),
+	);
+
+	$slides = array();
+	for ( $i = 1; $i <= 3; $i++ ) {
+		$d = $defaults[ $i ];
+
+		/* اسلاید اول از تنظیمات قدیمی هیرو ارث‌بری می‌کند تا سایت‌های فعال نشکنند. */
+		if ( 1 === $i ) {
+			$d['eyebrow']   = zarrin_get( 'zarrin_hero_eyebrow', $d['eyebrow'] );
+			$d['title']     = zarrin_get( 'zarrin_hero_title', $d['title'] );
+			$d['sub']       = zarrin_get( 'zarrin_hero_sub', $d['sub'] );
+			$d['img']       = zarrin_get( 'zarrin_hero_img', $d['img'] );
+			$d['btn1_text'] = zarrin_get( 'zarrin_hero_btn1_text', $d['btn1_text'] );
+			$d['btn1_url']  = zarrin_get( 'zarrin_hero_btn1_url', $d['btn1_url'] );
+			$d['btn2_text'] = zarrin_get( 'zarrin_hero_btn2_text', $d['btn2_text'] );
+			$d['btn2_url']  = zarrin_get( 'zarrin_hero_btn2_url', $d['btn2_url'] );
+		}
+
+		$img = zarrin_get( 'zarrin_slide' . $i . '_img', '' );
+		$slides[ $i ] = array(
+			'eyebrow'    => zarrin_get( 'zarrin_slide' . $i . '_eyebrow', $d['eyebrow'] ),
+			'title'      => zarrin_get( 'zarrin_slide' . $i . '_title', $d['title'] ),
+			'sub'        => zarrin_get( 'zarrin_slide' . $i . '_sub', $d['sub'] ),
+			'img'        => $img ? $img : ( preg_match( '#^https?://#', $d['img'] ) ? $d['img'] : zarrin_skin_img( $d['img'] ) ),
+			'btn1_text'  => zarrin_get( 'zarrin_slide' . $i . '_btn1_text', $d['btn1_text'] ),
+			'btn1_url'   => zarrin_get( 'zarrin_slide' . $i . '_btn1_url', $d['btn1_url'] ),
+			'btn2_text'  => zarrin_get( 'zarrin_slide' . $i . '_btn2_text', $d['btn2_text'] ),
+			'btn2_url'   => zarrin_get( 'zarrin_slide' . $i . '_btn2_url', $d['btn2_url'] ),
+			'show_price' => (bool) zarrin_get( 'zarrin_slide' . $i . '_price', $d['show_price'] ),
+		);
+	}
+
+	return $slides;
+}
+
+/**
+ * تبدیل متن چندخطی به آرایه سطرها.
+ * هر سطر با «|» به ستون‌ها تقسیم می‌شود.
+ *
+ * @param string $text متن خام.
+ * @param int    $cols تعداد ستون مورد انتظار.
+ * @return array
+ */
+function zarrin_parse_lines( $text, $cols = 2 ) {
+
+	$rows = array();
+	$text = (string) $text;
+	if ( '' === trim( $text ) ) {
+		return $rows;
+	}
+	foreach ( preg_split( '/
+|
+|
+/', $text ) as $line ) {
+		$line = trim( $line );
+		if ( '' === $line ) {
+			continue;
+		}
+		$parts = array_map( 'trim', explode( '|', $line ) );
+		if ( count( $parts ) < $cols ) {
+			continue;
+		}
+		$rows[] = array_slice( $parts, 0, $cols );
+	}
+	return $rows;
+}
+
+/** نظرات مشتریان (پیش‌فرض + قابل ویرایش) */
+function zarrin_testimonials() {
+
+	$raw = zarrin_get( 'zarrin_testimonials_text', '' );
+	$rows = zarrin_parse_lines( $raw, 4 );
+
+	if ( empty( $rows ) ) {
+		$rows = array(
+			array( 'مریم رضایی', 'تهران', '۵', 'انگشتر رو با پست پیشتاز و بسته‌بندی خیلی تمیز گرفتم؛ مهر عیار و شناسنامه همراهش بود. قیمت هم دقیقاً بر اساس نرخ روز محاسبه شد.' ),
+			array( 'علی محمدی', 'اصفهان', '۵', 'برای معاوضه رفتم و بدون هیچ دردسری طلای قدیمی‌ام را تعویض کردم. اجرت قبلی حساب نشد و همه‌چیز شفاف بود.' ),
+			array( 'سمیرا ک.', 'شیراز', '۴', 'مشاوره تلفنی خیلی کمک کرد تا بین دو مدل انتخاب کنم. ارسال کمی دیر شد ولی ارزشش را داشت.' ),
+			array( 'حسین ط.', 'مشهد', '۵', 'قیمت لحظه‌ای سایت را قبل از خرید چک کردم و فاکتور با همان نرخ صادر شد. اعتماد خوبی ایجاد می‌کند.' ),
+		);
+	}
+
+	return $rows;
+}
+
+/** سوالات متداول */
+function zarrin_faqs() {
+
+	$raw  = zarrin_get( 'zarrin_faq_text', '' );
+	$rows = zarrin_parse_lines( $raw, 2 );
+
+	if ( empty( $rows ) ) {
+		$rows = array(
+			array( 'قیمت محصولات چگونه محاسبه می‌شود؟', 'قیمت هر قطعه بر پایه نرخ لحظه‌ای گرم طلا در بازار، ضرب در وزن، به‌علاوه اجرت ساخت و سود فروشگاه محاسبه می‌شود. از محاسبه‌گر قیمت در صفحه محصول می‌توانید برآورد دقیق‌تری بگیرید.' ),
+			array( 'آیا محصولات شناسنامه و مهر عیار دارند؟', 'بله. تمام محصولات دارای مهر عیار، شناسنامه معتبر و فاکتور رسمی با ذکر وزن، عیار و اجرت هستند.' ),
+			array( 'شرایط معاوضه و بازخرید چیست؟', 'معاوضه طلا با طلا تا ۷ روز پس از خرید امکان‌پذیر است و اجرت ساخت قبلی محاسبه نمی‌شود. بازخرید نیز با کسر کارمزد و بر اساس نرخ روز انجام می‌شود.' ),
+			array( 'ارسال چگونه و با چه ضمانتی انجام می‌شود؟', 'ارسال با پست پیشتاز یا تیپاکس، کاملاً بیمه‌شده و با بسته‌بندی مخفی انجام می‌شود. کد رهگیری پس از ثبت سفارش پیامک می‌گردد.' ),
+			array( 'امکان پرداخت اقساطی یا کارت‌به‌کارت وجود دارد؟', 'بله، پرداخت از طریق درگاه بانکی امن (شاپرک) انجام می‌شود و برای سفارش‌های خاص امکان هماهنگی کارت‌به‌کارت یا پرداخت در محل (تهران) نیز فراهم است.' ),
+			array( 'اگر نرخ طلا پس از ثبت سفارش تغییر کند چه می‌شود؟', 'قیمت در زمان ثبت سفارش قطعی می‌شود. اگر پیش از پرداخت نرخ بازار تغییر کند، کارشناسان ما با شما تماس می‌گیرند و سفارش با نرخ جدید تأیید یا لغو می‌شود.' ),
+		);
+	}
+
+	return $rows;
+}
 
 /** آیا ووکامرس فعال است؟ */
 function zarrin_is_woo() {
@@ -325,6 +619,12 @@ require get_template_directory() . '/inc/demo-import.php';
 
 // مدیریت دموها (انتخاب سریع از نوار بالای پیشخوان + کارت‌های تصویری).
 require get_template_directory() . '/inc/skins-admin.php';
+
+// مشخصات تخصصی طلا (عیار، وزن، اجرت، شناسنامه) + محاسبه‌گر قیمت.
+require get_template_directory() . '/inc/gold-fields.php';
+
+// صفحات ورود/ثبت‌نام، سبد خرید، تسویه و ثبت نهایی خرید ووکامرس.
+require get_template_directory() . '/inc/woo-pages.php';
 
 /** آیکون‌های SVG قالب */
 function zarrin_icon( $name, $size = 20 ) {
@@ -488,6 +788,45 @@ function zarrin_refresh_live_prices() {
 }
 
 /**
+ * فاصله زمانی کرون به‌اندازه تنظیم «فاصله به‌روزرسانی خودکار قیمت».
+ *
+ * @param array $schedules زمان‌بندی‌های موجود.
+ * @return array
+ */
+function zarrin_cron_schedules( $schedules ) {
+
+	$minutes = max( 1, (int) zarrin_get( 'zarrin_live_interval', 10 ) );
+
+	$schedules['zarrin_prices_interval'] = array(
+		'interval' => MINUTE_IN_SECONDS * $minutes,
+		'display'  => 'زرین — به‌روزرسانی قیمت طلا (هر ' . zarrin_fa_digits( $minutes ) . ' دقیقه)',
+	);
+
+	return $schedules;
+}
+add_filter( 'cron_schedules', 'zarrin_cron_schedules' ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
+
+/** زمان‌بندی/حذف رویداد کرون بر اساس تنظیمات قالب */
+function zarrin_sync_prices_cron() {
+
+	if ( zarrin_live_enabled() ) {
+		if ( ! wp_next_scheduled( 'zarrin_refresh_prices_event' ) ) {
+			wp_schedule_event( time() + MINUTE_IN_SECONDS, 'zarrin_prices_interval', 'zarrin_refresh_prices_event' );
+		}
+	} elseif ( wp_next_scheduled( 'zarrin_refresh_prices_event' ) ) {
+		wp_clear_scheduled_hook( 'zarrin_refresh_prices_event' );
+	}
+}
+add_action( 'init', 'zarrin_sync_prices_cron' );
+add_action( 'zarrin_refresh_prices_event', 'zarrin_refresh_live_prices' );
+
+/** پاک‌سازی زمان‌بندی هنگام تغییر قالب */
+function zarrin_clear_prices_cron() {
+	wp_clear_scheduled_hook( 'zarrin_refresh_prices_event' );
+}
+add_action( 'switch_theme', 'zarrin_clear_prices_cron' );
+
+/**
  * داده‌های قیمت برای نمایش (لحظه‌ای یا دستی).
  *
  * @return array
@@ -556,6 +895,7 @@ function zarrin_ajax_live_prices() {
 		$items[ $key ] = array(
 			'formatted' => zarrin_money( $data[ $key ]['value'] ),
 			'badge'     => zarrin_change_badge( $data[ $key ]['change'] ),
+			'raw'       => is_numeric( $data[ $key ]['value'] ) ? (float) $data[ $key ]['value'] : 0,
 		);
 	}
 
@@ -768,8 +1108,8 @@ function zarrin_customize_register( $wp_customize ) {
 	$wp_customize->add_control(
 		'zarrin_live_interval',
 		array(
-			'label'       => 'فاصله به‌روزرسانی سرور (دقیقه)',
-			'description' => 'پیشنهاد: ۵ تا ۱۵ دقیقه. مرورگر بازدیدکنندگان هر ۹۰ ثانیه آخرین قیمت کش‌شده را می‌گیرد.',
+			'label'       => 'فاصله به‌روزرسانی خودکار قیمت (دقیقه)',
+			'description' => 'پیش‌فرض ۱۰ دقیقه. سرور در این فاصله نرخ‌ها را از بازار می‌خواند، مرورگر بازدیدکننده هم در همان فاصله آخرین نرخ کش‌شده را به‌روز می‌کند و کرون وردپرس نیز به‌صورت زمان‌بندی‌شده قیمت‌ها را تازه می‌کند.'
 			'section'     => 'zarrin_prices',
 			'type'        => 'number',
 			'input_attrs' => array(
@@ -840,5 +1180,123 @@ function zarrin_customize_register( $wp_customize ) {
 		'textarea',
 		'wp_kses_post'
 	);
+
+	/* ============ بخش: بلوک‌های صفحه اصلی (اسلایدر، نظرات، سوالات) ============ */
+	$wp_customize->add_section(
+		'zarrin_blocks',
+		array(
+			'title'       => 'بلوک‌های صفحه اصلی',
+			'panel'       => 'zarrin_panel',
+			'description' => 'اسلایدر چنداسلایدی، نوار متحرک نرخ، نظرات مشتریان و سوالات متداول را از اینجا مدیریت کنید.',
+		)
+	);
+
+	$zarrin_toggles = array(
+		'zarrin_slider_enable'     => array( 'اسلایدر چنداسلایدی بنر اصلی', true ),
+		'zarrin_marquee_enable'    => array( 'نوار متحرک نرخ طلا و سکه', true ),
+		'zarrin_testi_enable'      => array( 'بخش نظرات مشتریان', true ),
+		'zarrin_faq_enable'        => array( 'بخش سوالات متداول', true ),
+		'zarrin_float_enable'      => array( 'نوار اقدام شناور در موبایل (تماس، واتساپ، سبد)', true ),
+		'zarrin_sticky_atc_enable' => array( 'نوار چسبان «افزودن به سبد» در موبایل', true ),
+		'zarrin_calc_enable'       => array( 'محاسبه‌گر قیمت روز در صفحه محصول', true ),
+		'zarrin_trust_badges'      => array( 'نمایش نشان‌های اعتماد در سبد و تسویه', true ),
+	);
+
+	foreach ( $zarrin_toggles as $zarrin_tid => $zarrin_tinfo ) {
+		$wp_customize->add_setting(
+			$zarrin_tid,
+			array(
+				'default'           => $zarrin_tinfo[1],
+				'sanitize_callback' => 'zarrin_sanitize_checkbox',
+			)
+		);
+		$wp_customize->add_control(
+			$zarrin_tid,
+			array(
+				'label'   => $zarrin_tinfo[0],
+				'section' => 'zarrin_blocks',
+				'type'    => 'checkbox',
+			)
+		);
+	}
+
+	/* --- اسلایدهای هیرو --- */
+	for ( $zarrin_si = 1; $zarrin_si <= 3; $zarrin_si++ ) {
+		zarrin_add_field( $wp_customize, 'zarrin_slide' . $zarrin_si . '_eyebrow', 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — متن کوچک', 'zarrin_blocks', '' );
+		zarrin_add_field( $wp_customize, 'zarrin_slide' . $zarrin_si . '_title', 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — عنوان', 'zarrin_blocks', '' );
+		zarrin_add_field( $wp_customize, 'zarrin_slide' . $zarrin_si . '_sub', 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — توضیح', 'zarrin_blocks', '', 'textarea' );
+		zarrin_add_image( $wp_customize, 'zarrin_slide' . $zarrin_si . '_img', 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — تصویر', 'zarrin_blocks' );
+		zarrin_add_field( $wp_customize, 'zarrin_slide' . $zarrin_si . '_btn1_text', 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — متن دکمه اول', 'zarrin_blocks', '' );
+		zarrin_add_field( $wp_customize, 'zarrin_slide' . $zarrin_si . '_btn1_url', 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — لینک دکمه اول', 'zarrin_blocks', '' );
+		zarrin_add_field( $wp_customize, 'zarrin_slide' . $zarrin_si . '_btn2_text', 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — متن دکمه دوم', 'zarrin_blocks', '' );
+		zarrin_add_field( $wp_customize, 'zarrin_slide' . $zarrin_si . '_btn2_url', 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — لینک دکمه دوم', 'zarrin_blocks', '' );
+		$wp_customize->add_setting(
+			'zarrin_slide' . $zarrin_si . '_price',
+			array(
+				'default'           => ( 1 === $zarrin_si ),
+				'sanitize_callback' => 'zarrin_sanitize_checkbox',
+			)
+		);
+		$wp_customize->add_control(
+			'zarrin_slide' . $zarrin_si . '_price',
+			array(
+				'label'   => 'اسلاید ' . zarrin_fa_digits( $zarrin_si ) . ' — نمایش کارت قیمت لحظه‌ای',
+				'section' => 'zarrin_blocks',
+				'type'    => 'checkbox',
+			)
+		);
+	}
+
+	zarrin_add_field(
+		$wp_customize,
+		'zarrin_testimonials_text',
+		'نظرات مشتریان — هر سطر: نام | شهر | امتیاز ۱ تا ۵ | متن',
+		'zarrin_blocks',
+		'',
+		'textarea',
+		'sanitize_textarea_field'
+	);
+	zarrin_add_field(
+		$wp_customize,
+		'zarrin_faq_text',
+		'سوالات متداول — هر سطر: سوال | پاسخ',
+		'zarrin_blocks',
+		'',
+		'textarea',
+		'sanitize_textarea_field'
+	);
+
+	/* ============ بخش: تنظیمات طلا و ووکامرس ============ */
+	$wp_customize->add_section(
+		'zarrin_gold',
+		array(
+			'title'       => 'تنظیمات طلا و فروش',
+			'panel'       => 'zarrin_panel',
+			'description' => 'مقادیر پیش‌فرض محاسبه‌گر قیمت و راه‌های ارتباط سریع مشتری.',
+		)
+	);
+	$wp_customize->add_setting(
+		'zarrin_default_profit',
+		array(
+			'default'           => 7,
+			'sanitize_callback' => 'absint',
+		)
+	);
+	$wp_customize->add_control(
+		'zarrin_default_profit',
+		array(
+			'label'       => 'سود پیش‌فرض فروشگاه (درصد)',
+			'description' => 'در محاسبه‌گر قیمت روز استفاده می‌شود. برای هر محصول قابل تغییر است.',
+			'section'     => 'zarrin_gold',
+			'type'        => 'number',
+			'input_attrs' => array(
+				'min'  => 0,
+				'max'  => 100,
+				'step' => 1,
+			),
+		)
+	);
+	zarrin_add_field( $wp_customize, 'zarrin_whatsapp_num', 'شماره واتساپ برای سفارش (با کد کشور، بدون +)', 'zarrin_gold', '989123456789' );
+	zarrin_add_field( $wp_customize, 'zarrin_telegram_id', 'شناسه تلگرام برای پشتیبانی', 'zarrin_gold', '' );
 }
 add_action( 'customize_register', 'zarrin_customize_register' );
