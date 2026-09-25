@@ -124,7 +124,7 @@ function zarrin_auth_shortcode( $atts ) {
 		return '<div class="zauth-card" style="text-align:center">'
 			. '<p style="font-weight:800;margin:0 0 6px">خوش آمدید، ' . esc_html( $user->display_name ) . '</p>'
 			. '<p style="color:var(--muted);font-size:.85rem">شما وارد حساب خود شده‌اید.</p>'
-			. '<p><a class="button" href="' . esc_url( wc_get_page_permalink( 'myaccount' ) ) . '">حساب کاربری من</a></p>'
+			. '<p><a class="button" href="' . esc_url( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'myaccount' ) : home_url( '/' ) ) . '">حساب کاربری من</a></p>'
 			. '</div>';
 	}
 
@@ -399,13 +399,61 @@ add_action( 'woocommerce_cart_is_empty', 'zarrin_empty_cart_content' );
  * ۵) ثبت نهایی خرید (صفحه تشکر) و فاکتور
  * ======================================================= */
 
-/** کارت خلاصه سفارش پس از پرداخت */
-function zarrin_thankyou_card( $order_id ) {
+/**
+ * یافتن سفارش جاری در صفحه تأیید سفارش (سازگار با تسویه کلاسیک و بلوکی).
+ *
+ * @return WC_Order|false
+ */
+function zarrin_current_order() {
+
+	if ( ! function_exists( 'wc_get_order' ) ) {
+		return false;
+	}
+
+	$order_id = absint( get_query_var( 'order-received' ) );
+	if ( ! $order_id && isset( $_GET['order-received'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		$order_id = absint( wp_unslash( $_GET['order-received'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	}
+	if ( ! $order_id && isset( $_GET['orderId'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		$order_id = absint( wp_unslash( $_GET['orderId'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	}
+	if ( ! $order_id ) {
+		return false;
+	}
 
 	$order = wc_get_order( $order_id );
 	if ( ! $order ) {
-		return;
+		return false;
 	}
+
+	/* اعتبارسنجی کلید سفارش تا فاکتور دیگران نمایش داده نشود. */
+	$key = '';
+	foreach ( array( 'key', 'orderKey' ) as $zarrin_key_name ) {
+		if ( ! empty( $_GET[ $zarrin_key_name ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$key = sanitize_text_field( wp_unslash( $_GET[ $zarrin_key_name ] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			break;
+		}
+	}
+	if ( $key && ! hash_equals( (string) $order->get_order_key(), $key ) && ! current_user_can( 'manage_woocommerce' ) ) {
+		return false;
+	}
+
+	return $order;
+}
+
+/**
+ * خروجی HTML کارت خلاصه سفارش.
+ *
+ * @param WC_Order $order سفارش.
+ * @return string
+ */
+function zarrin_thankyou_card_html( $order ) {
+
+	if ( ! $order instanceof WC_Order ) {
+		return '';
+	}
+
+	ob_start();
 
 	$nid    = $order->get_meta( '_billing_national_id' );
 	$phone  = $order->get_billing_phone();
@@ -466,8 +514,46 @@ function zarrin_thankyou_card( $order_id ) {
 		</div>
 	</div>
 	<?php
+	return ob_get_clean();
+}
+
+/** نمایش کارت خلاصه در صفحه ثبت نهایی خرید (ووکامرس کلاسیک) */
+function zarrin_thankyou_card( $order_id ) {
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return;
+	}
+	echo zarrin_thankyou_card_html( $order ); // phpcs:ignore WordPress.Security.EscapeOutput
 }
 add_action( 'woocommerce_thankyou', 'zarrin_thankyou_card', 5 );
+
+/**
+ * تزریق کارت خلاصه سفارش در صفحه تأیید سفارش بلوکی (ووکامرس ۸.۱ به بعد).
+ *
+ * @param string $content محتوای برگه.
+ * @return string
+ */
+function zarrin_inject_thankyou_card( $content ) {
+
+	if ( is_admin() || ! is_main_query() || ! in_the_loop() ) {
+		return $content;
+	}
+	if ( ! function_exists( 'is_order_received_page' ) || ! is_order_received_page() ) {
+		return $content;
+	}
+	if ( false !== strpos( $content, 'zthanks-card' ) ) {
+		return $content;
+	}
+
+	$order = zarrin_current_order();
+	if ( ! $order ) {
+		return $content;
+	}
+
+	return zarrin_thankyou_card_html( $order ) . $content;
+}
+add_filter( 'the_content', 'zarrin_inject_thankyou_card', 20 );
 
 /** نشان‌های اعتماد پایین صفحه تشکر */
 function zarrin_thankyou_badges() {
@@ -543,3 +629,135 @@ function zarrin_single_trust_chips() {
 	<?php
 }
 add_action( 'woocommerce_single_product_summary', 'zarrin_single_trust_chips', 36 );
+
+/* =========================================================
+ * ۷) پشتیبانی از «سبد خرید بلوکی» و «تسویه حساب بلوکی» ووکامرس
+ *    (ووکامرس ۸.۳ به بعد این حالت پیش‌فرض است و هوک‌های کلاسیک اجرا نمی‌شوند)
+ * ======================================================= */
+
+/** یادداشت پرداخت برای بلوک تسویه */
+function zarrin_checkout_block_note_html() {
+
+	ob_start();
+	?>
+	<div class="z-checkout-block-note">
+		<?php zarrin_checkout_pay_info(); ?>
+	</div>
+	<?php
+	return ob_get_clean();
+}
+
+/** حالت سبد خالی برای بلوک سبد */
+function zarrin_empty_cart_block_html() {
+
+	ob_start();
+	zarrin_empty_cart_content();
+	return ob_get_clean();
+}
+
+/**
+ * تزریق اجزای زرین داخل بلوک‌های ووکامرس.
+ *
+ * @param string $block_content خروجی بلوک.
+ * @param array  $block         بلوک.
+ * @return string
+ */
+function zarrin_inject_woo_blocks( $block_content, $block ) {
+
+	if ( empty( $block['blockName'] ) || ! is_string( $block_content ) ) {
+		return $block_content;
+	}
+
+	switch ( $block['blockName'] ) {
+
+		case 'woocommerce/cart':
+			if ( zarrin_get( 'zarrin_trust_badges', true ) && false === strpos( $block_content, 'ztrust' ) ) {
+				$block_content = zarrin_trust_badges_html() . $block_content;
+			}
+			if ( false === strpos( $block_content, 'z-insurance' ) ) {
+				ob_start();
+				zarrin_cart_insurance_note();
+				$block_content .= ob_get_clean();
+			}
+			break;
+
+		case 'woocommerce/empty-cart-block':
+			if ( false === strpos( $block_content, 'z-cart-empty' ) ) {
+				$block_content .= zarrin_empty_cart_block_html();
+			}
+			break;
+
+		case 'woocommerce/checkout':
+			if ( zarrin_get( 'zarrin_trust_badges', true ) && false === strpos( $block_content, 'ztrust' ) ) {
+				$block_content = zarrin_trust_badges_html() . $block_content;
+			}
+			if ( false === strpos( $block_content, 'z-checkout-block-note' ) ) {
+				$block_content .= zarrin_checkout_block_note_html();
+			}
+			break;
+	}
+
+	return $block_content;
+}
+add_filter( 'render_block', 'zarrin_inject_woo_blocks', 10, 2 );
+
+/** فیلد کد ملی در تسویه بلوکی (به‌همراه برچسب فارسی) */
+function zarrin_register_block_checkout_fields() {
+
+	if ( ! function_exists( 'woocommerce_register_additional_checkout_field' ) ) {
+		return;
+	}
+
+	woocommerce_register_additional_checkout_field(
+		array(
+			'id'       => 'zarrin/national-id',
+			'label'    => 'کد ملی (برای فاکتور رسمی طلا)',
+			'location' => 'contact',
+			'type'     => 'text',
+			'required' => false,
+		)
+	);
+
+	woocommerce_register_additional_checkout_field(
+		array(
+			'id'       => 'zarrin/order-note',
+			'label'    => 'توضیحات سفارش (اندازه، حکاکی یا ساعت تحویل)',
+			'location' => 'contact',
+			'type'     => 'text',
+			'required' => false,
+		)
+	);
+}
+add_action( 'woocommerce_init', 'zarrin_register_block_checkout_fields' );
+
+/** انتقال مقادیر فیلدهای بلوکی به متای سفارش (برای فاکتور و ایمیل) */
+function zarrin_block_order_meta( $order ) {
+
+	if ( ! $order instanceof WC_Order ) {
+		return;
+	}
+
+	$nid = $order->get_meta( '_wc_other/zarrin/national-id' );
+	if ( $nid ) {
+		$order->update_meta_data( '_billing_national_id', zarrin_normalize_mobile( $nid ) );
+		$order->save();
+	}
+}
+add_action( 'woocommerce_store_api_checkout_order_processed', 'zarrin_block_order_meta', 10, 1 );
+
+/** بارگذاری اسکریپت کوچک برای تغییر متن دکمه ثبت سفارش در تسویه بلوکی */
+function zarrin_block_checkout_assets() {
+
+	if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
+		return;
+	}
+
+	wp_enqueue_script(
+		'zarrin-blocks',
+		get_template_directory_uri() . '/assets/js/blocks.js',
+		array(),
+		ZARRIN_VERSION,
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', 'zarrin_block_checkout_assets' );

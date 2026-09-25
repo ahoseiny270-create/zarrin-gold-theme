@@ -495,3 +495,14 @@
 }
 .z-insurance svg{color:var(--gold-strong);flex:none;margin-top:3px}
 .z-insurance b{color:var(--text)}
+
+/* =========================================================
+ * ۱۴) تکمیل‌های نسخه ۱.۵.۱ — سبد و تسویه بلوکی ووکامرس
+ * ======================================================= */
+.wp-block-woocommerce-cart .ztrust,
+.wp-block-woocommerce-checkout .ztrust{margin-bottom:26px}
+.wp-block-woocommerce-cart .z-insurance{margin-top:22px}
+.z-checkout-block-note{max-width:720px;margin:26px auto 0}
+.z-checkout-block-note .z-pay-logos{justify-content:center}
+.wc-block-components-order-summary .ztrust li,
+.wp-block-woocommerce-checkout .ztrust li{font-size:.8rem}

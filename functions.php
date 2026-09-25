@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ZARRIN_VERSION', '1.5.0' );
+define( 'ZARRIN_VERSION', '1.5.1' );
 
 /* =========================================================
  * ۱) راه‌اندازی قالب
@@ -579,6 +579,27 @@ function zarrin_faqs() {
 	return $rows;
 }
 
+/**
+ * نخستین حرف یک متن (سازگار با سرورهای بدون mbstring).
+ *
+ * @param string $text متن.
+ * @return string
+ */
+function zarrin_first_char( $text ) {
+
+	$text = trim( wp_strip_all_tags( (string) $text ) );
+	if ( '' === $text ) {
+		return '';
+	}
+	if ( function_exists( 'mb_substr' ) ) {
+		return mb_substr( $text, 0, 1, 'UTF-8' );
+	}
+	if ( preg_match( '/^./u', $text, $m ) ) {
+		return $m[0];
+	}
+	return substr( $text, 0, 1 );
+}
+
 /** آیا ووکامرس فعال است؟ */
 function zarrin_is_woo() {
 	return class_exists( 'WooCommerce' );
@@ -1109,7 +1130,7 @@ function zarrin_customize_register( $wp_customize ) {
 		'zarrin_live_interval',
 		array(
 			'label'       => 'فاصله به‌روزرسانی خودکار قیمت (دقیقه)',
-			'description' => 'پیش‌فرض ۱۰ دقیقه. سرور در این فاصله نرخ‌ها را از بازار می‌خواند، مرورگر بازدیدکننده هم در همان فاصله آخرین نرخ کش‌شده را به‌روز می‌کند و کرون وردپرس نیز به‌صورت زمان‌بندی‌شده قیمت‌ها را تازه می‌کند.'
+			'description' => 'پیش‌فرض ۱۰ دقیقه. سرور در این فاصله نرخ‌ها را از بازار می‌خواند، مرورگر بازدیدکننده هم در همان فاصله آخرین نرخ کش‌شده را به‌روز می‌کند و کرون وردپرس نیز به‌صورت زمان‌بندی‌شده قیمت‌ها را تازه می‌کند.',
 			'section'     => 'zarrin_prices',
 			'type'        => 'number',
 			'input_attrs' => array(

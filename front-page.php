@@ -248,7 +248,7 @@ if ( $zarrin_show_products ) :
 						</a>
 						<div class="product-body">
 							<?php if ( function_exists( 'wc_get_product_category_list' ) ) : ?>
-								<span class="product-cat"><?php echo wp_kses_post( $zarrin_wc_product ? $zarrin_wc_product->get_categories( '، ' ) : '' ); ?></span>
+								<span class="product-cat"><?php echo wp_kses_post( ( $zarrin_wc_product && function_exists( 'wc_get_product_category_list' ) ) ? wc_get_product_category_list( $zarrin_wc_product->get_id(), '، ' ) : '' ); ?></span>
 							<?php endif; ?>
 							<h3 class="product-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
 							<span class="product-price"><?php echo wp_kses_post( $zarrin_wc_product ? $zarrin_wc_product->get_price_html() : '' ); ?></span>
@@ -289,7 +289,7 @@ endif;
 								<span class="ztesti-quote">”</span>
 								<blockquote class="ztesti-text"><?php echo esc_html( $zarrin_row[3] ); ?></blockquote>
 								<figcaption class="ztesti-meta">
-									<span class="ztesti-avatar"><?php echo esc_html( mb_substr( $zarrin_row[0], 0, 1 ) ); ?></span>
+									<span class="ztesti-avatar"><?php echo esc_html( zarrin_first_char( $zarrin_row[0] ) ); ?></span>
 									<span>
 										<span class="ztesti-name"><?php echo esc_html( $zarrin_row[0] ); ?></span>
 										<span class="ztesti-city"><?php echo esc_html( $zarrin_row[1] ); ?></span>
