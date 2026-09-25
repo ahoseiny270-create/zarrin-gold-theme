@@ -12,7 +12,7 @@ Theme URI: https://github.com/ahoseiny270-create/zarrin-gold-theme
 Author: ahoseiny270-create
 Author URI: https://github.com/ahoseiny270-create
 Description: قالب فروشگاهی لوکس مخصوص طلا‌فروشی و جواهرفی — کاملاً راست‌چین و فارسی، سازگار با ووکامرس، دارای نرخ طلا با به‌روزرسانی هر ۱۰ دقیقه، اسلایدر چنداسلایدی، نظرات مشتریان، سوالات متداول، مشخصات عیار و وزن، محاسبه‌گر قیمت طلا، صفحات ورود/ثبت‌نام و سبد و تسویه و فاکتور اختصاصی، دموی تک‌کلیکی و پنج پوسته رنگ آماده (تیره طلایی، روشن عاجی، زمرد، کاکائو، رزگلد).
-Version: 1.5.0
+Version: 1.5.1
 Requires at least: 6.0
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
@@ -1250,6 +1250,17 @@ html.js .reveal.in-view{opacity:1;transform:none}
 }
 .z-insurance svg{color:var(--gold-strong);flex:none;margin-top:3px}
 .z-insurance b{color:var(--text)}
+
+/* =========================================================
+ * ۱۴) تکمیل‌های نسخه ۱.۵.۱ — سبد و تسویه بلوکی ووکامرس
+ * ======================================================= */
+.wp-block-woocommerce-cart .ztrust,
+.wp-block-woocommerce-checkout .ztrust{margin-bottom:26px}
+.wp-block-woocommerce-cart .z-insurance{margin-top:22px}
+.z-checkout-block-note{max-width:720px;margin:26px auto 0}
+.z-checkout-block-note .z-pay-logos{justify-content:center}
+.wc-block-components-order-summary .ztrust li,
+.wp-block-woocommerce-checkout .ztrust li{font-size:.8rem}
 
 /* افزوده‌های پیش‌نمایش */
 .zpv-banner{background:linear-gradient(90deg,#1a1510,#3a2d16);color:#f1dc9b;padding:10px 16px;font-size:.82rem;text-align:center;border-bottom:1px solid rgba(217,182,78,.3)}
