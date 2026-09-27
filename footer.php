@@ -90,7 +90,8 @@
 						echo '<li><a href="' . esc_url( get_permalink( $zarrin_refund ) ) . '">رویه بازگشت کالا</a></li>';
 					}
 				}
-				$zarrin_privacy = get_privacy_policy_url();
+				/* get_privacy_policy_url در وردپرس ۴.۹.۶ اضافه شده است. */
+				$zarrin_privacy = function_exists( 'get_privacy_policy_url' ) ? get_privacy_policy_url() : '';
 				if ( $zarrin_privacy ) {
 					echo '<li><a href="' . esc_url( $zarrin_privacy ) . '">حریم خصوصی</a></li>';
 				}

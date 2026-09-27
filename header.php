@@ -13,7 +13,14 @@
 <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
-<?php wp_body_open(); ?>
+<?php
+/* wp_body_open در وردپرس ۵.۲ معرفی شده؛ روی نسخه‌های قدیمی‌تر بی‌اثر رد می‌شود. */
+if ( function_exists( 'wp_body_open' ) ) {
+	wp_body_open();
+} elseif ( function_exists( 'do_action' ) ) {
+	do_action( 'zarrin_body_open' );
+}
+?>
 
 <a class="skip-link" href="#content">پرش به محتوا</a>
 

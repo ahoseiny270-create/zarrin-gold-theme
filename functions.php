@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ZARRIN_VERSION', '1.5.1' );
+define( 'ZARRIN_VERSION', '1.5.2' );
 
 /* =========================================================
  * ۱) راه‌اندازی قالب
