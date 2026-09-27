@@ -8,12 +8,12 @@
 <style data-skin="gold" media="not all">
 /*
 Theme Name: زرین | قالب فروشگاه طلا
-Theme URI: https://github.com/ahoseiny270-create/zarrin-gold-theme
-Author: ahoseiny270-create
-Author URI: https://github.com/ahoseiny270-create
+Theme URI: https://rtl-theme.com/
+Author: گروه زرین
+Author URI: https://rtl-theme.com/
 Description: قالب فروشگاهی لوکس مخصوص طلا‌فروشی و جواهرفی — کاملاً راست‌چین و فارسی، سازگار با ووکامرس، دارای تیکر قیمت طلا و سکه، بخش معرفی فروشگاه، خدمات، وبلاگ و تنظیمات اختصاصی در سفارشی‌سازی.
-Version: 1.2.0
-Requires at least: 6.0
+Version: 1.5.2
+Requires at least: 4.5
 Requires PHP: 7.4
 License: GNU General Public License v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -4182,7 +4182,7 @@ body{padding-bottom:64px}
 </head>
 <body>
 <div style="background:linear-gradient(90deg,#1a1510,#3d2f16);color:#f4e3b4;padding:12px 18px;text-align:center;font-family:Vazirmatn,system-ui,sans-serif;font-size:.9rem;border-bottom:1px solid rgba(217,182,78,.35)">
-🎉 نسخه <b style="color:#d9b64e">۱.۵.۱</b> قالب زرین منتشر شد — نرخ هر ۱۰ دقیقه، اسلایدر چنداسلایدی، محاسبه‌گر قیمت، صفحات ثبت‌نام/سبد/تسویه/فاکتور.
+🎉 نسخه <b style="color:#d9b64e">۱.۵.۲</b> قالب زرین منتشر شد — نرخ هر ۱۰ دقیقه، اسلایدر چنداسلایدی، محاسبه‌گر قیمت، صفحات ثبت‌نام/سبد/تسویه/فاکتور.
 <a href="v15.html" style="color:#d9b64e;text-decoration:underline;font-weight:800;margin-inline-start:6px">پیش‌نمایش امکانات جدید ←</a>
 </div>
 
@@ -4652,8 +4652,18 @@ body{padding-bottom:64px}
     });
   }
   document.querySelectorAll('.sk-btn').forEach(function (b) {
-    b.addEventListener('click', function () { apply(b.getAttribute('data-skin')); });
+    b.addEventListener('click', function () {
+      var sk = b.getAttribute('data-skin');
+      apply(sk);
+      try { history.replaceState(null, '', '?skin=' + sk); } catch (e) {}
+    });
   });
+  /* لینک مستقیم به هر پوسته: ?skin=light یا #light */
+  try {
+    var mm = /[?&]skin=([a-z]+)/.exec(location.search);
+    var want = mm ? mm[1] : (location.hash ? location.hash.replace('#', '') : '');
+    if (want && document.querySelector('.sk-btn[data-skin="' + want + '"]')) { current = want; }
+  } catch (e) {}
   apply(current);
 
   /* تنظیم فاصله پایین صفحه با ارتفاع واقعی نوار */
